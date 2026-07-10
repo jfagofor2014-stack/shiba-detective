@@ -625,7 +625,11 @@ git commit -m "feat: エンディング判定 resolveEnding()（A/B/C/D）"
       "dialogue": [
         { "speaker": "じゅんこ", "text": "……お魚クッキー、まるまる一袋。犯人はこの家にいる。" }
       ],
-      "supportHint": { "speaker": "蔵之介", "text": "（お腹を見せて寝ている）" },
+      "supportHint": [
+        { "dog": "raizo", "speaker": "雷蔵", "text": "（部屋の隅でクンクン、鼻を鳴らしている）" },
+        { "dog": "hana", "speaker": "はな", "text": "（じゅんこをジロリと見て、早く探せと言いたげ）" },
+        { "dog": "kuranosuke", "speaker": "蔵之介", "text": "（お腹を見せて寝ている）" }
+      ],
       "commands": [
         { "text": "▶しらべる（ソファ）", "next": "ch1_junko_sofa" },
         { "text": "▶しらべる（ソファの隙間）", "next": "ch1_junko_sofa_gap", "condition": { "flag": "evidence_mud" } },
@@ -638,7 +642,9 @@ git commit -m "feat: エンディング判定 resolveEnding()（A/B/C/D）"
 }
 ```
 
-残りの第1章シーン（`ch1_junko_sofa` 〜 `ch1_taichi_done`、計21シーン）をシーングラフ表どおりに書く。文体は「レトロADVの乾いた地の文＋コメディ」。`ch1_junko_done` と `ch1_taichi_done` には `"chapterEnd": true` を付け、`commands` は持たせない。
+残りの第1章シーン（`ch1_junko_sofa` 〜 `ch1_taichi_done`、第1章は計18シーン）をシーングラフ表どおりに書く。文体は「レトロADVの乾いた地の文＋コメディ」。`ch1_junko_done` と `ch1_taichi_done` には `"chapterEnd": true` を付け、`commands` は持たせない。
+
+`supportHint` は**犬ごとの選択肢を並べた配列**にする。お留守番の犬はプレイごとに変わるため、単一オブジェクトでは書けない。描画側は `state.supportDog` に一致する要素を1つ選ぶ。
 
 - [ ] **Step 2: 失敗するテストを書く**
 
@@ -1684,9 +1690,8 @@ function draw() {
   const lines = [];
   if (scene.description) lines.push({ text: scene.description });
   for (const d of scene.dialogue ?? []) lines.push(d);
-  if (scene.supportHint && scene.supportHint.speaker === DOG_LABEL[state.supportDog]) {
-    lines.push(scene.supportHint);
-  }
+  const hint = scene.supportHint?.find((h) => h.dog === state.supportDog);
+  if (hint) lines.push({ speaker: hint.speaker, text: hint.text });
 
   renderCommands(el.commandList, [], () => {});
   typing = renderDialogue(el.dialogue, lines, { onDone: drawCommands });
