@@ -785,17 +785,20 @@ git commit -m "feat: シナリオ読込・整合性検証と第1章"
 - Consumes: `loadScenario`, `validateScenario`
 - Produces: 章末シーンの `nextChapter` フィールド（`main.js` が章送りに使う）
 
-第1章の `ch1_junko_done` / `ch1_taichi_done` に `"nextChapter": "ch2_junko_slope"` / `"nextChapter": "ch2_taichi_station"` を足し、第2章の全17シーンを追加する。
+第1章の `ch1_junko_done` / `ch1_taichi_done` に `"nextChapter": "ch2_junko_slope"` / `"nextChapter": "ch2_taichi_station"` を足し、第2章の全19シーンを追加する。
 
 - [ ] **Step 1: 失敗するテストを書く**
 
 `test/scenario.test.js` に追記:
 
 ```js
-test('章末シーンは nextChapter を持つ（最終章を除く）', () => {
+test('章末シーンは nextChapter を持つ（現時点の最終章を除く）', () => {
+  // データに存在する最大章より前の章末だけが nextChapter を要求される。
+  // 章を1つずつ足していく開発中も、各段階でこの不変条件は成立する。
   const s = loadScenario(raw);
+  const maxChapter = Math.max(...[...s.scenes.values()].map((sc) => sc.chapter ?? 0));
   for (const [id, scene] of s.scenes) {
-    if (scene.chapterEnd && scene.chapter < 4) {
+    if (scene.chapterEnd && scene.chapter < maxChapter) {
       assert.ok(scene.nextChapter, `${id} に nextChapter がない`);
       assert.ok(s.scenes.has(scene.nextChapter), `${id}: nextChapter の参照先が存在しない`);
     }
