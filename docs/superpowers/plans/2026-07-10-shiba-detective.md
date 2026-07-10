@@ -962,8 +962,15 @@ function reachableFlagSets(scenario, junkoBuddy, taichiBuddy) {
   const results = new Set();
   const stack = [initial];
 
+  // カウンタは 3 で頭打ちにする。taichi_delay の導出は 3 以上で同じ挙動になるため、
+  // 4回目以降を別状態として数えると探索が停止しない。
   const key = (s) =>
-    JSON.stringify([s.sceneId, Object.keys(s.flags).sort(), s.counters, s.deductions]);
+    JSON.stringify([
+      s.sceneId,
+      Object.keys(s.flags).sort(),
+      Object.fromEntries(Object.entries(s.counters).map(([k, v]) => [k, Math.min(v, 3)])),
+      [...s.deductions].sort(),
+    ]);
 
   while (stack.length) {
     const s = stack.pop();
@@ -1047,9 +1054,7 @@ Expected: FAIL — `ch4_ending_a が無い`
 - [ ] **Step 4: テストが通ることを確認**
 
 Run: `node --test test/scenario.test.js`
-Expected: PASS（15 tests）
-
-探索が数秒で終わらない場合、状態キーに `counters` を丸ごと含めているせいで `taichi_mitsumeru` が無限に増える。カウンタは `Math.min(n, 3)` に丸めてキーを作ること（3以上は `taichi_delay` の導出に差が出ないため、状態として等価）。
+Expected: PASS（15 tests）。探索は数秒で終わる。もし停止しない場合は `key()` のカウンタ丸めが効いていない。
 
 - [ ] **Step 5: コミット**
 
