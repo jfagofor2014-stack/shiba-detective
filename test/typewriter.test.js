@@ -7,10 +7,10 @@ const immediate = (fn) => { fn(); return 0; };
 
 test('1文字ずつ onChar が呼ばれ、最後に onDone', () => {
   const chars = [];
-  let done = false;
-  typewriter('あいう', { onChar: (c) => chars.push(c), onDone: () => { done = true; }, schedule: immediate });
+  let doneCount = 0;
+  typewriter('あいう', { onChar: (c) => chars.push(c), onDone: () => { doneCount++; }, schedule: immediate });
   assert.deepEqual(chars, ['あ', 'い', 'う']);
-  assert.equal(done, true);
+  assert.equal(doneCount, 1);
 });
 
 test('サロゲートペアを壊さない', () => {
@@ -35,7 +35,7 @@ test('skip() で残りを一気に流し、onDone を1度だけ呼ぶ', () => {
 });
 
 test('空文字は即 onDone', () => {
-  let done = false;
-  typewriter('', { onChar: () => assert.fail('呼ばれてはいけない'), onDone: () => { done = true; }, schedule: immediate });
-  assert.equal(done, true);
+  let doneCount = 0;
+  typewriter('', { onChar: () => assert.fail('呼ばれてはいけない'), onDone: () => { doneCount++; }, schedule: immediate });
+  assert.equal(doneCount, 1);
 });
