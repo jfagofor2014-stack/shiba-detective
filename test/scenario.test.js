@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { loadScenario, validateScenario, KNOWN_DEDUCTIONS } from '../src/scenario.js';
 import { visibleCommands, applyCommand, resolveEnding } from '../src/engine.js';
+import { ART_IDS } from '../src/ui/art.js';
 
 const raw = JSON.parse(readFileSync(new URL('../data/scenario.json', import.meta.url), 'utf8'));
 
@@ -321,4 +322,11 @@ test('taichi_delay はどのバディ配分でも「みつめる」が出る時�
   assert.ok(!withHana.some((fs) => fs.includes('taichi_delay')));
   const withRaizo = reachableFlagSets(s, 'hana', 'raizo');
   assert.ok(withRaizo.some((fs) => fs.includes('taichi_delay')));
+});
+
+test('シナリオの art はすべて実在する', () => {
+  const s = loadScenario(raw);
+  for (const [id, scene] of s.scenes) {
+    if (scene.art) assert.ok(ART_IDS.includes(scene.art), `${id}: 未知の art -> ${scene.art}`);
+  }
 });
