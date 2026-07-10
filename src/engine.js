@@ -81,3 +81,17 @@ export function applyCommand(state, command) {
   }
   return next;
 }
+
+export function resolveEnding(flags) {
+  const a = flags.suspicious_father === true && flags.found_empty_box === true;
+  const b = flags.evidence_black_hair === true && flags.info_black_cat === true;
+  if (a && b) return 'D';
+  if (a) return 'A';
+  if (b) return 'B';
+  return 'C';
+}
+
+export function endingSceneId(ending, flags) {
+  if (ending === 'C' && flags.taichi_delay === true) return 'ch4_ending_c_delay';
+  return `ch4_ending_${ending.toLowerCase()}`;
+}

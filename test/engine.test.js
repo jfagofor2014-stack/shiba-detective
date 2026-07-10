@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluate, contextFor, visibleCommands, applyCommand, DERIVED_FLAGS } from '../src/engine.js';
+import { evaluate, contextFor, visibleCommands, applyCommand, DERIVED_FLAGS, resolveEnding, endingSceneId } from '../src/engine.js';
 
 const ctx = (over = {}) => ({
   flags: {}, counters: {}, buddy: 'raizo', support: 'hana', deductions: [], ...over,
@@ -187,4 +187,39 @@ test('applyCommand は command.route が不正な値だと例外を投げる', (
 
 test('applyCommand は route:"common" に next が付いていると例外を投げる', () => {
   assert.throws(() => applyCommand(baseState(), { next: 'x', route: 'common' }), /command\.route/);
+});
+
+test('resolveEnding: A条件のみで A', () => {
+  assert.equal(resolveEnding({ suspicious_father: true, found_empty_box: true }), 'A');
+});
+
+test('resolveEnding: B条件のみで B', () => {
+  assert.equal(resolveEnding({ evidence_black_hair: true, info_black_cat: true }), 'B');
+});
+
+test('resolveEnding: 両方揃うと D', () => {
+  assert.equal(resolveEnding({
+    suspicious_father: true, found_empty_box: true,
+    evidence_black_hair: true, info_black_cat: true,
+  }), 'D');
+});
+
+test('resolveEnding: 片方ずつ欠けると C', () => {
+  assert.equal(resolveEnding({ suspicious_father: true, evidence_black_hair: true }), 'C');
+});
+
+test('resolveEnding: フラグ皆無でも C（詰みを作らない）', () => {
+  assert.equal(resolveEnding({}), 'C');
+});
+
+test('resolveEnding: taichi_delay は判定に影響しない', () => {
+  assert.equal(resolveEnding({ taichi_delay: true }), 'C');
+  assert.equal(resolveEnding({ taichi_delay: true, suspicious_father: true, found_empty_box: true }), 'A');
+});
+
+test('endingSceneId: C は taichi_delay で分岐する', () => {
+  assert.equal(endingSceneId('C', {}), 'ch4_ending_c');
+  assert.equal(endingSceneId('C', { taichi_delay: true }), 'ch4_ending_c_delay');
+  assert.equal(endingSceneId('A', { taichi_delay: true }), 'ch4_ending_a');
+  assert.equal(endingSceneId('D', {}), 'ch4_ending_d');
 });
