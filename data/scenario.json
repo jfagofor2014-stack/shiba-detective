@@ -666,6 +666,7 @@
       "route": "junko",
       "chapter": 3,
       "chapterEnd": true,
+      "nextChapter": "ch4_finale_intro",
       "locationName": "自宅 2階リビング",
       "art": "living",
       "description": "電話を切る。伝えるべきことは、伝えた。あとはたいち次第。",
@@ -847,11 +848,146 @@
       "route": "taichi",
       "chapter": 3,
       "chapterEnd": true,
+      "nextChapter": "ch4_finale_intro",
       "locationName": "基地の街 バー通り",
       "art": "kichi",
       "description": "日が暮れて、ネオンが灯り始める。たいちの三日目の聞き込みは、ここで一区切り。",
       "dialogue": [
         { "speaker": "たいち", "text": "……さとる君、か。あとは、家に帰って確かめるだけだ。" }
+      ]
+    },
+    {
+      "sceneId": "ch4_finale_intro",
+      "route": "common",
+      "chapter": 4,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "二人がリビングに戻ってきた。テーブルの上に、それぞれが集めた証拠と証言を並べる。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "たいち、そっちの成果は？" },
+        { "speaker": "たいち", "text": "基地の街の話と、犬どもの証言、色々あるぞ。" },
+        { "speaker": "じゅんこ", "text": "じゃあ、全部並べてみようか。" }
+      ],
+      "commands": [
+        { "text": "▶推理を突き合わせる", "next": "ch4_answer" }
+      ]
+    },
+    {
+      "sceneId": "ch4_answer",
+      "route": "common",
+      "chapter": 4,
+      "resolvesEnding": true,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "二人は無言で、テーブルの上の証拠を見比べる。犬たちも、なぜかそわそわしている。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "……全部、繋がった気がする。" }
+      ]
+    },
+    {
+      "sceneId": "ch4_ending_a",
+      "route": "common",
+      "chapter": 4,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "お父さんが、ばつが悪そうに白状する。",
+      "dialogue": [
+        { "speaker": "お父さん", "text": "……いや、その、な。孫が来た時のために、取っておこうと思って。" },
+        { "speaker": "たいち", "text": "だったら最初から言えよ、親父。" },
+        { "speaker": "お父さん", "text": "空き箱をそのまま突っ込んだのは、悪かった。" },
+        { "speaker": "じゅんこ", "text": "犯人、お父さんかぁ……。" },
+        { "speaker": "たいち", "text": "拍子抜けだな、こんなの。" },
+        { "speaker": "お父さん", "text": "孫は正義だ。文句あるか。" }
+      ],
+      "commands": [
+        { "text": "▶最初から" }
+      ]
+    },
+    {
+      "sceneId": "ch4_ending_b",
+      "route": "common",
+      "chapter": 4,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "証拠がすべて、近所の黒猫・黒兵衛を指し示す。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "黒兵衛……あの野良猫、まさかね。" },
+        { "speaker": "たいち", "text": "毛も、目撃情報も、全部符合するぞ。" },
+        { "speaker": "じゅんこ", "text": "でも、猫がクッキーの箱、開けられる?" },
+        { "speaker": "たいち", "text": "……近所の犬にでも配ってたのかもな。" },
+        { "speaker": "じゅんこ", "text": "義賊気取りの黒猫、か。" },
+        { "speaker": "たいち", "text": "今度会ったら、説教してやる。" }
+      ],
+      "commands": [
+        { "text": "▶最初から" }
+      ]
+    },
+    {
+      "sceneId": "ch4_ending_c",
+      "route": "common",
+      "chapter": 4,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "証拠も証言も、決定的な手がかりにはならなかった。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "結局、犯人、絞りきれなかったね。" },
+        { "speaker": "たいち", "text": "……実はな。俺も一枚噛んでる。" },
+        { "speaker": "じゅんこ", "text": "は?" },
+        { "speaker": "たいち", "text": "酔って帰った夜、気づいたら箱、空だった。" },
+        { "speaker": "じゅんこ", "text": "たいちが、自分で食べたの!?" },
+        { "speaker": "たいち", "text": "多分な……悪い、みんな。" },
+        { "speaker": "じゅんこ", "text": "犬たちに聞き込みしてる間、何やってたのよ。" }
+      ],
+      "commands": [
+        { "text": "▶最初から" }
+      ]
+    },
+    {
+      "sceneId": "ch4_ending_c_delay",
+      "route": "common",
+      "chapter": 4,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "証拠も証言も、決定的な手がかりにはならなかった。おまけに、たいちには余罪もある。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "結局、犯人、絞りきれなかったね。" },
+        { "speaker": "たいち", "text": "……実はな。俺も一枚噛んでる。" },
+        { "speaker": "じゅんこ", "text": "は?" },
+        { "speaker": "たいち", "text": "酔って帰った夜、気づいたら箱、空だった。" },
+        { "speaker": "じゅんこ", "text": "たいちが、自分で食べたの!?" },
+        { "speaker": "たいち", "text": "多分な……悪い、みんな。" },
+        { "speaker": "じゅんこ", "text": "というか、道中何回女の子見てたの。" },
+        { "speaker": "たいち", "text": "……数えてたのか。" },
+        { "speaker": "じゅんこ", "text": "3回はカウントした。捜査中よ、たいち。" },
+        { "speaker": "たいち", "text": "……次から気をつける。" }
+      ],
+      "commands": [
+        { "text": "▶最初から" }
+      ]
+    },
+    {
+      "sceneId": "ch4_ending_d",
+      "route": "common",
+      "chapter": 4,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "二人が証拠を並べ終えた瞬間、三頭が同時に顔を上げた。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "父さんの空箱と、黒兵衛の毛……両方、本物?" },
+        { "speaker": "たいち", "text": "両方だ。じゃあ、犯人は一人じゃない?" },
+        { "speaker": "雷蔵", "text": "（クゥン……ずっと、黒兵衛の匂い知ってたのに）" },
+        { "speaker": "はな", "text": "（じっと、お父さんを見つめたまま動かない）" },
+        { "speaker": "蔵之介", "text": "（起き上がって、空箱があった方角を見つめる）" },
+        { "speaker": "たいち", "text": "……お前ら、まさか最初から知ってたのか。" },
+        { "speaker": "じゅんこ", "text": "雷蔵は匂いで、はなは嘘を見抜いて。" },
+        { "speaker": "たいち", "text": "蔵之介は、箱の場所を知ってた、ってことか。" },
+        { "speaker": "じゅんこ", "text": "なんで、黙ってたの。" },
+        { "speaker": "三頭", "text": "……ワオオオオオオン!!" },
+        { "speaker": "たいち", "text": "……歌ってる。リビングで、遠吠えしてる。" },
+        { "speaker": "じゅんこ", "text": "教えてよ、そういうことは先に。" }
+      ],
+      "commands": [
+        { "text": "▶最初から" }
       ]
     }
   ]

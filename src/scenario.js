@@ -3,7 +3,7 @@ export const KNOWN_FLAGS = new Set([
   'info_black_cat', 'info_satoru_bag', 'found_empty_box', 'taichi_delay',
 ]);
 export const KNOWN_COUNTERS = new Set(['taichi_mitsumeru']);
-// Chapter 3 で使われる推理ID（まだシーンは存在しないが、validateScenario で検証するために先出しする）
+// Chapter 3 で使われる推理ID（validateScenario で condition の deduction 値を検証するために使う）
 export const KNOWN_DEDUCTIONS = new Set(['cat', 'hair', 'mud']);
 
 const VALID_CONDITION_DOGS = new Set(['raizo', 'hana', 'kuranosuke']);

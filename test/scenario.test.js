@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { loadScenario, validateScenario, KNOWN_DEDUCTIONS } from '../src/scenario.js';
+import { visibleCommands, applyCommand, resolveEnding } from '../src/engine.js';
 
 const raw = JSON.parse(readFileSync(new URL('../data/scenario.json', import.meta.url), 'utf8'));
 
@@ -218,4 +219,106 @@ test('蔵之介の狂犬化は info_satoru_bag を要求する（乱数を使わ
   assert.deepEqual(rage.condition, {
     allOf: [{ buddy: 'kuranosuke' }, { flag: 'info_satoru_bag' }],
   });
+});
+
+const BUDDY_ASSIGNMENTS = [
+  ['raizo', 'hana'], ['raizo', 'kuranosuke'],
+  ['hana', 'raizo'], ['hana', 'kuranosuke'],
+  ['kuranosuke', 'raizo'], ['kuranosuke', 'hana'],
+];
+
+// あるバディ配分で到達しうるフラグ集合をすべて列挙する（フラグは単調増加なので有限）
+function reachableFlagSets(scenario, junkoBuddy, taichiBuddy) {
+  const dogs = ['raizo', 'hana', 'kuranosuke'];
+  const support = dogs.find((d) => d !== junkoBuddy && d !== taichiBuddy);
+  const initial = {
+    buddies: { junko: junkoBuddy, taichi: taichiBuddy },
+    supportDog: support,
+    sceneId: { ...scenario.start },
+    chapter: { junko: 1, taichi: 1 },
+    chapterDone: { junko: false, taichi: false },
+    flags: {}, counters: {}, deductions: [], ending: null,
+  };
+
+  const seen = new Set();
+  const results = new Set();
+  const stack = [initial];
+
+  // カウンタは 3 で頭打ちにする。taichi_delay の導出は 3 以上で同じ挙動になるため、
+  // 4回目以降を別状態として数えると探索が停止しない。
+  const key = (s) =>
+    JSON.stringify([
+      s.sceneId,
+      Object.keys(s.flags).sort(),
+      Object.fromEntries(Object.entries(s.counters).map(([k, v]) => [k, Math.min(v, 3)])),
+      [...s.deductions].sort(),
+    ]);
+
+  while (stack.length) {
+    const s = stack.pop();
+    const k = key(s);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    results.add(JSON.stringify(Object.keys(s.flags).sort()));
+
+    for (const route of ['junko', 'taichi']) {
+      const scene = scenario.scenes.get(s.sceneId[route]);
+      if (!scene) continue;
+      if (scene.chapterEnd) {
+        if (scene.nextChapter && scenario.scenes.has(scene.nextChapter)) {
+          stack.push({ ...s, sceneId: { ...s.sceneId, [route]: scene.nextChapter } });
+        }
+        continue;
+      }
+      for (const cmd of visibleCommands(scene, s)) {
+        stack.push(applyCommand(s, { ...cmd, route }));
+      }
+    }
+  }
+  return [...results].map((r) => JSON.parse(r));
+}
+
+function endingsFor(scenario, junkoBuddy, taichiBuddy) {
+  const set = new Set();
+  for (const flagList of reachableFlagSets(scenario, junkoBuddy, taichiBuddy)) {
+    const flags = Object.fromEntries(flagList.map((f) => [f, true]));
+    set.add(resolveEnding(flags));
+  }
+  return set;
+}
+
+test('エンディングシーンが4種そろっている（Cの派生を含めて5）', () => {
+  const s = loadScenario(raw);
+  for (const id of ['ch4_ending_a', 'ch4_ending_b', 'ch4_ending_c', 'ch4_ending_c_delay', 'ch4_ending_d']) {
+    assert.ok(s.scenes.has(id), `${id} が無い`);
+  }
+});
+
+test('たいちが雷蔵か蔵之介なら A・B・C・D すべてに到達できる', () => {
+  const s = loadScenario(raw);
+  for (const [j, t] of BUDDY_ASSIGNMENTS.filter(([, t]) => t !== 'hana')) {
+    const got = endingsFor(s, j, t);
+    for (const e of ['A', 'B', 'C', 'D']) {
+      assert.ok(got.has(e), `バディ(${j}/${t}) でエンディング ${e} に到達できない`);
+    }
+  }
+});
+
+test('たいちがはなの時は found_empty_box が取れず、A・D に到達しない', () => {
+  const s = loadScenario(raw);
+  for (const [j, t] of BUDDY_ASSIGNMENTS.filter(([, t]) => t === 'hana')) {
+    const got = endingsFor(s, j, t);
+    assert.ok(!got.has('A'), `バディ(${j}/${t}) で A に到達してしまう`);
+    assert.ok(!got.has('D'), `バディ(${j}/${t}) で D に到達してしまう`);
+    assert.ok(got.has('B'), `バディ(${j}/${t}) で B に到達できない`);
+    assert.ok(got.has('C'), `バディ(${j}/${t}) で C に到達できない`);
+  }
+});
+
+test('taichi_delay はどのバディ配分でも「みつめる」が出る時だけ立つ', () => {
+  const s = loadScenario(raw);
+  const withHana = reachableFlagSets(s, 'raizo', 'hana');
+  assert.ok(!withHana.some((fs) => fs.includes('taichi_delay')));
+  const withRaizo = reachableFlagSets(s, 'hana', 'raizo');
+  assert.ok(withRaizo.some((fs) => fs.includes('taichi_delay')));
 });
