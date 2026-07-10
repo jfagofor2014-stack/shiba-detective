@@ -156,10 +156,13 @@ test('validateScenario は next の無いコマンドをエラーにしない', 
   assert.deepEqual(validateScenario(ok), []);
 });
 
-test('章末シーンは nextChapter を持つ（最終章を除く）', () => {
+test('章末シーンは nextChapter を持つ（現時点の最終章を除く）', () => {
+  // データに存在する最大章より前の章末だけが nextChapter を要求される。
+  // 章を1つずつ足していく開発中も、各段階でこの不変条件は成立する。
   const s = loadScenario(raw);
+  const maxChapter = Math.max(...[...s.scenes.values()].map((sc) => sc.chapter ?? 0));
   for (const [id, scene] of s.scenes) {
-    if (scene.chapterEnd && scene.chapter < 4) {
+    if (scene.chapterEnd && scene.chapter < maxChapter) {
       assert.ok(scene.nextChapter, `${id} に nextChapter がない`);
       assert.ok(s.scenes.has(scene.nextChapter), `${id}: nextChapter の参照先が存在しない`);
     }
