@@ -140,11 +140,13 @@
 | `ch3_taichi_kichi` | taichi | `kichi` | ▶きく（紙袋のこと）`{flag:info_satoru_bag}` | `ch3_taichi_ask_bag` | — |
 | | | | ▶きく（黒猫を見なかったか）`{deduction:cat}` | `ch3_taichi_ask_cat` | — |
 | | | | ▶きく（黒い毛のこと）`{deduction:hair}` | `ch3_taichi_ask_hair` | — |
+| | | | ▶きく（泥の跡のこと）`{deduction:mud}` | `ch3_taichi_ask_mud` | — |
 | | | | ▶バディに頼む | `ch3_taichi_buddy` | — |
 | | | | ▶章を終える | `ch3_taichi_done` | — |
 | `ch3_taichi_ask_bag` | taichi | `kichi` | ▶もどる | `ch3_taichi_kichi` | — |
 | `ch3_taichi_ask_cat` | taichi | `kichi` | ▶もどる | `ch3_taichi_kichi` | — |
 | `ch3_taichi_ask_hair` | taichi | `kichi` | ▶もどる | `ch3_taichi_kichi` | — |
+| `ch3_taichi_ask_mud` | taichi | `kichi` | ▶もどる | `ch3_taichi_kichi` | — |
 | `ch3_taichi_buddy` | taichi | `kichi` | ▶クンクンする `{buddy:raizo}` | `ch3_taichi_raizo` | — |
 | | | | ▶ジロリとみる `{buddy:hana}` | `ch3_taichi_hana` | — |
 | | | | ▶へそ天 `{allOf:[{buddy:kuranosuke},{flag:info_satoru_bag}]}` | `ch3_taichi_kuranosuke_rage` | — |
