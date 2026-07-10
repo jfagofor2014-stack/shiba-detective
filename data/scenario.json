@@ -141,6 +141,7 @@
       "route": "junko",
       "chapter": 1,
       "chapterEnd": true,
+      "nextChapter": "ch2_junko_slope",
       "locationName": "自宅 2階リビング",
       "art": "living",
       "description": "手がかりを手帳にまとめる。じゅんこの捜査は、ひとまずここまで。",
@@ -287,11 +288,308 @@
       "route": "taichi",
       "chapter": 1,
       "chapterEnd": true,
+      "nextChapter": "ch2_taichi_station",
       "locationName": "自宅 玄関",
       "art": "entrance",
       "description": "陽が落ちる。たいちの一日目の聞き込みは、ここで一区切り。",
       "dialogue": [
         { "speaker": "たいち", "text": "じゅんこの方はどうだったかな。……電話するの、忘れてたわ。" }
+      ]
+    },
+    {
+      "sceneId": "ch2_junko_slope",
+      "route": "junko",
+      "chapter": 2,
+      "locationName": "藤原2組 坂道",
+      "art": "slope",
+      "description": "急な坂道。両側に古い家々が並び、下から潮の匂いがする。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "……この坂、地図で見るより急ね。迷子になりそう。" }
+      ],
+      "supportHint": [
+        { "dog": "raizo", "speaker": "雷蔵", "text": "（坂道の匂いをクンクン、忙しそうに嗅ぎ回る）" },
+        { "dog": "hana", "speaker": "はな", "text": "（坂の先を、じっとジロリと見据えている）" },
+        { "dog": "kuranosuke", "speaker": "蔵之介", "text": "（もう坂の途中でへそ天しかけている）" }
+      ],
+      "commands": [
+        { "text": "▶いどう（井上肉店へ）", "next": "ch2_junko_nikuten" },
+        { "text": "▶しらべる（側溝）", "next": "ch2_junko_gutter" }
+      ]
+    },
+    {
+      "sceneId": "ch2_junko_gutter",
+      "route": "junko",
+      "chapter": 2,
+      "locationName": "藤原2組 坂道",
+      "art": "slope",
+      "description": "坂の側溝を覗き込む。落ち葉に混じって何かキラリと光った気がしたが、すぐ流れていった。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "……あ、逃げた。まあ、事件とは関係ないか。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch2_junko_slope" }
+      ]
+    },
+    {
+      "sceneId": "ch2_junko_nikuten",
+      "route": "junko",
+      "chapter": 2,
+      "locationName": "井上肉店",
+      "art": "nikuten",
+      "description": "コロッケの匂いが漂う、坂の途中の小さな肉屋。おばちゃんが暖簾の下で腕を組んでいる。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "こんにちは。ちょっと、お伺いしたいことがあって。" }
+      ],
+      "commands": [
+        { "text": "▶きく（おばちゃんに）", "next": "ch2_junko_obachan" },
+        { "text": "▶バディに頼む", "next": "ch2_junko_buddy" },
+        { "text": "▶いどう（坂道へ）", "next": "ch2_junko_slope" },
+        { "text": "▶章を終える", "next": "ch2_junko_done", "condition": { "flag": "info_black_cat" } }
+      ]
+    },
+    {
+      "sceneId": "ch2_junko_obachan",
+      "route": "junko",
+      "chapter": 2,
+      "locationName": "井上肉店",
+      "art": "nikuten",
+      "description": "おばちゃんが身を乗り出し、声をひそめる。噂話は得意分野らしい。",
+      "dialogue": [
+        { "speaker": "おばちゃん", "text": "あら奥さん、聞いた？　最近この辺、黒兵衛が出るのよ。" },
+        { "speaker": "じゅんこ", "text": "黒兵衛……？" },
+        { "speaker": "おばちゃん", "text": "野良の黒猫。図体が大きくて、人の家にも上がり込むの。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch2_junko_nikuten", "setFlag": "info_black_cat" }
+      ]
+    },
+    {
+      "sceneId": "ch2_junko_buddy",
+      "route": "junko",
+      "chapter": 2,
+      "locationName": "井上肉店",
+      "art": "nikuten",
+      "description": "バディの犬に合図を出す。さて、何をしてもらおうか。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "お願い、力を借りるわよ。" }
+      ],
+      "commands": [
+        { "text": "▶クンクンする", "next": "ch2_junko_raizo", "condition": { "buddy": "raizo" } },
+        { "text": "▶ジロリとみる", "next": "ch2_junko_hana", "condition": { "buddy": "hana" } },
+        { "text": "▶へそ天", "next": "ch2_junko_kuranosuke", "condition": { "buddy": "kuranosuke" } }
+      ]
+    },
+    {
+      "sceneId": "ch2_junko_raizo",
+      "route": "junko",
+      "chapter": 2,
+      "locationName": "井上肉店",
+      "art": "raizo",
+      "description": "雷蔵が店先の匂いをクンクン嗅ぎ回る。肉の匂いに気を取られている。",
+      "dialogue": [
+        { "speaker": "雷蔵", "text": "……クンクン。コロッケの匂いが強すぎて、他が分からん。" },
+        { "speaker": "じゅんこ", "text": "食欲に負けたわね、雷蔵。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch2_junko_nikuten" }
+      ]
+    },
+    {
+      "sceneId": "ch2_junko_hana",
+      "route": "junko",
+      "chapter": 2,
+      "locationName": "井上肉店",
+      "art": "hana",
+      "description": "はなが店先の暖簾の陰を、じっとジロリと見つめる。",
+      "dialogue": [
+        { "speaker": "はな", "text": "……（暖簾の陰を見つめたまま動かない）" },
+        { "speaker": "おばちゃん", "text": "あら、この子、黒兵衛の通り道を見てるんじゃない？" },
+        { "speaker": "じゅんこ", "text": "……もしかして、それも手がかりね。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch2_junko_nikuten", "setFlag": "info_black_cat" }
+      ]
+    },
+    {
+      "sceneId": "ch2_junko_kuranosuke",
+      "route": "junko",
+      "chapter": 2,
+      "locationName": "井上肉店",
+      "art": "kuranosuke",
+      "description": "蔵之介、店先の日当たりのいい場所でさっそくへそ天。",
+      "dialogue": [
+        { "speaker": "蔵之介", "text": "……（へそ天。ここは日当たり良好、仕事はまた今度）" },
+        { "speaker": "じゅんこ", "text": "肉屋の前で堂々と寝るのね、あなたは。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch2_junko_nikuten" }
+      ]
+    },
+    {
+      "sceneId": "ch2_junko_done",
+      "route": "junko",
+      "chapter": 2,
+      "chapterEnd": true,
+      "locationName": "井上肉店",
+      "art": "nikuten",
+      "description": "手帳に黒兵衛のことを書き加える。じゅんこの追跡は、ひとまずここまで。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "黒い猫、ね。……たいちの方はどうかしら。" }
+      ]
+    },
+    {
+      "sceneId": "ch2_taichi_station",
+      "route": "taichi",
+      "chapter": 2,
+      "locationName": "佐世保駅前",
+      "art": "station",
+      "description": "改札の向こう、行き交う人々。夕方の駅前は、思いのほか賑やかだ。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "さとる君の足取り、ここから追ってみるか。" }
+      ],
+      "supportHint": [
+        { "dog": "raizo", "speaker": "雷蔵", "text": "（駅前の匂いをクンクン、忙しそうに嗅ぎ回る）" },
+        { "dog": "hana", "speaker": "はな", "text": "（たいちの視線をジロリと監視している）" },
+        { "dog": "kuranosuke", "speaker": "蔵之介", "text": "（もう駅前でへそ天しかけている）" }
+      ],
+      "commands": [
+        { "text": "▶いどう（しまばらやへ）", "next": "ch2_taichi_shimabaraya" },
+        { "text": "▶みつめる（改札の美女を）", "next": "ch2_taichi_station_look", "condition": { "buddyNot": "hana" }, "count": "taichi_mitsumeru" }
+      ]
+    },
+    {
+      "sceneId": "ch2_taichi_station_look",
+      "route": "taichi",
+      "chapter": 2,
+      "locationName": "佐世保駅前",
+      "art": "station",
+      "description": "改札を出てきた美女に、思わず視線が吸い寄せられる。捜査そっちのけだ。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "……いや、これも重要な観察だ。多分。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch2_taichi_station" }
+      ]
+    },
+    {
+      "sceneId": "ch2_taichi_shimabaraya",
+      "route": "taichi",
+      "chapter": 2,
+      "locationName": "しまばらや（スーパー）",
+      "art": "shimabaraya",
+      "description": "日中だけ開く、坂の上の小さなスーパー。だいき君が配達の荷物を積んでいる。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "だいき君、ちょっといいか。事件のことで。" }
+      ],
+      "commands": [
+        { "text": "▶きく（事件について）", "next": "ch2_taichi_listen" },
+        { "text": "▶みつめる（美女を）", "next": "ch2_taichi_look_girl", "condition": { "buddyNot": "hana" }, "count": "taichi_mitsumeru" },
+        { "text": "▶バディに頼む", "next": "ch2_taichi_buddy" },
+        { "text": "▶いどう（佐世保駅へ）", "next": "ch2_taichi_station" },
+        { "text": "▶章を終える", "next": "ch2_taichi_done", "condition": { "flag": "info_satoru_bag" } }
+      ]
+    },
+    {
+      "sceneId": "ch2_taichi_listen",
+      "route": "taichi",
+      "chapter": 2,
+      "locationName": "しまばらや（スーパー）",
+      "art": "shimabaraya",
+      "description": "だいき君が手を止めて、思い出したように話し始める。",
+      "dialogue": [
+        { "speaker": "だいき君", "text": "そういえば、さとる君が紙袋提げて坂登ってったの見たよ。" },
+        { "speaker": "たいち", "text": "紙袋？　いつ頃の話だ？" },
+        { "speaker": "だいき君", "text": "夕方だったかな。ずいぶん重そうにしてたけど。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch2_taichi_shimabaraya", "setFlag": "info_satoru_bag" }
+      ]
+    },
+    {
+      "sceneId": "ch2_taichi_look_girl",
+      "route": "taichi",
+      "chapter": 2,
+      "locationName": "しまばらや（スーパー）",
+      "art": "shimabaraya",
+      "description": "店先を通り過ぎる美女に、たいちの目が釘付けになる。捜査の手が止まる。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "……いや、これも重要な観察だ。多分。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch2_taichi_shimabaraya" }
+      ]
+    },
+    {
+      "sceneId": "ch2_taichi_buddy",
+      "route": "taichi",
+      "chapter": 2,
+      "locationName": "しまばらや（スーパー）",
+      "art": "shimabaraya",
+      "description": "バディの犬に合図を出す。さて、何をしてもらおうか。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "よし、お前の力を借りるぞ。" }
+      ],
+      "commands": [
+        { "text": "▶クンクンする", "next": "ch2_taichi_raizo", "condition": { "buddy": "raizo" } },
+        { "text": "▶ジロリとみる", "next": "ch2_taichi_hana", "condition": { "buddy": "hana" } },
+        { "text": "▶へそ天", "next": "ch2_taichi_kuranosuke", "condition": { "buddy": "kuranosuke" } }
+      ]
+    },
+    {
+      "sceneId": "ch2_taichi_raizo",
+      "route": "taichi",
+      "chapter": 2,
+      "locationName": "しまばらや（スーパー）",
+      "art": "raizo",
+      "description": "雷蔵が店の裏手、坂道の方に向かって鼻を鳴らす。",
+      "dialogue": [
+        { "speaker": "雷蔵", "text": "……クンクン。紙袋の匂いだ。坂を登ってったな、こいつ。" },
+        { "speaker": "たいち", "text": "紙袋……さとる君のことか？　でかした、雷蔵。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch2_taichi_shimabaraya", "setFlag": "info_satoru_bag" }
+      ]
+    },
+    {
+      "sceneId": "ch2_taichi_hana",
+      "route": "taichi",
+      "chapter": 2,
+      "locationName": "しまばらや（スーパー）",
+      "art": "hana",
+      "description": "はなが坂道の方角を、じっとジロリと見つめている。",
+      "dialogue": [
+        { "speaker": "はな", "text": "……（坂の方を見つめたまま、微動だにしない）" },
+        { "speaker": "たいち", "text": "何か見えるのか？　いや、俺には分からんが。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch2_taichi_shimabaraya" }
+      ]
+    },
+    {
+      "sceneId": "ch2_taichi_kuranosuke",
+      "route": "taichi",
+      "chapter": 2,
+      "locationName": "しまばらや（スーパー）",
+      "art": "kuranosuke",
+      "description": "蔵之介、店先の段ボールの陰でへそ天。荷物と一緒に積まれそうだ。",
+      "dialogue": [
+        { "speaker": "蔵之介", "text": "……（へそ天。段ボールの隙間、居心地は悪くない）" },
+        { "speaker": "たいち", "text": "お前、そろそろ配達物と間違われるぞ。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch2_taichi_shimabaraya" }
+      ]
+    },
+    {
+      "sceneId": "ch2_taichi_done",
+      "route": "taichi",
+      "chapter": 2,
+      "chapterEnd": true,
+      "locationName": "しまばらや（スーパー）",
+      "art": "shimabaraya",
+      "description": "西日が坂道を橙色に染める。たいちの二日目の聞き込みは、ここで一区切り。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "さとる君、か。……今度こそ、電話しておくか。" }
       ]
     }
   ]

@@ -155,3 +155,24 @@ test('validateScenario は next の無いコマンドをエラーにしない', 
   });
   assert.deepEqual(validateScenario(ok), []);
 });
+
+test('章末シーンは nextChapter を持つ（最終章を除く）', () => {
+  const s = loadScenario(raw);
+  for (const [id, scene] of s.scenes) {
+    if (scene.chapterEnd && scene.chapter < 4) {
+      assert.ok(scene.nextChapter, `${id} に nextChapter がない`);
+      assert.ok(s.scenes.has(scene.nextChapter), `${id}: nextChapter の参照先が存在しない`);
+    }
+  }
+});
+
+test('第2章の「みつめる」は2箇所あり、はなの時は出ない', () => {
+  const s = loadScenario(raw);
+  const lookCmds = [...s.scenes.values()]
+    .flatMap((sc) => sc.commands ?? [])
+    .filter((c) => c.count === 'taichi_mitsumeru');
+  assert.equal(lookCmds.length, 2);
+  for (const c of lookCmds) {
+    assert.deepEqual(c.condition, { buddyNot: 'hana' });
+  }
+});

@@ -115,6 +115,8 @@ export function validateScenario(scenario) {
     for (const cmd of scenes.get(id).commands ?? []) {
       if (scenes.has(cmd.next)) queue.push(cmd.next);
     }
+    const nc = scenes.get(id).nextChapter;
+    if (nc && scenes.has(nc)) queue.push(nc);
   }
   // エンディングシーンは main.js が直接遷移させるため、到達判定から除外する
   for (const id of scenes.keys()) {
