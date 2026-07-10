@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluate } from '../src/engine.js';
+import { evaluate, contextFor, visibleCommands, applyCommand } from '../src/engine.js';
 
 const ctx = (over = {}) => ({
   flags: {}, counters: {}, buddy: 'raizo', support: 'hana', deductions: [], ...over,
@@ -56,4 +56,85 @@ test('allOf が空配列なら真', () => {
 
 test('未知のキーは例外を投げる', () => {
   assert.throws(() => evaluate({ unknownKey: 'x' }, ctx()), /unknown condition/);
+});
+
+const baseState = (over = {}) => ({
+  buddies: { junko: 'raizo', taichi: 'kuranosuke' },
+  supportDog: 'hana',
+  sceneId: { junko: 'ch1_junko_living', taichi: 'ch1_taichi_entrance' },
+  chapter: { junko: 1, taichi: 1 },
+  chapterDone: { junko: false, taichi: false },
+  flags: {},
+  counters: {},
+  deductions: [],
+  ending: null,
+  ...over,
+});
+
+test('contextFor は route ごとのバディを載せる', () => {
+  const s = baseState();
+  assert.equal(contextFor(s, 'junko').buddy, 'raizo');
+  assert.equal(contextFor(s, 'taichi').buddy, 'kuranosuke');
+  assert.equal(contextFor(s, 'junko').support, 'hana');
+});
+
+test('visibleCommands は条件を満たすコマンドだけ返す', () => {
+  const scene = {
+    sceneId: 'x', route: 'taichi',
+    commands: [
+      { text: 'A', next: 'a' },
+      { text: 'B', next: 'b', condition: { buddyNot: 'hana' } },
+      { text: 'C', next: 'c', condition: { flag: 'nope' } },
+    ],
+  };
+  const got = visibleCommands(scene, baseState()).map((c) => c.text);
+  assert.deepEqual(got, ['A', 'B']);
+});
+
+test('visibleCommands は commands 未定義のシーンで空配列を返す', () => {
+  assert.deepEqual(visibleCommands({ sceneId: 'x', route: 'common' }, baseState()), []);
+});
+
+test('applyCommand は setFlag を立て、シーンを進める', () => {
+  const s = baseState();
+  const next = applyCommand(s, { text: '', next: 'ch1_junko_sofa', setFlag: 'evidence_mud', route: 'junko' });
+  assert.equal(next.flags.evidence_mud, true);
+  assert.equal(next.sceneId.junko, 'ch1_junko_sofa');
+  assert.equal(next.sceneId.taichi, 'ch1_taichi_entrance');
+});
+
+test('applyCommand は元の state を破壊しない', () => {
+  const s = baseState();
+  applyCommand(s, { next: 'x', setFlag: 'evidence_mud', route: 'junko' });
+  assert.deepEqual(s.flags, {});
+  assert.equal(s.sceneId.junko, 'ch1_junko_living');
+});
+
+test('applyCommand は count でカウンタを増やす', () => {
+  let s = baseState();
+  s = applyCommand(s, { next: 'x', count: 'taichi_mitsumeru', route: 'taichi' });
+  assert.equal(s.counters.taichi_mitsumeru, 1);
+  s = applyCommand(s, { next: 'y', count: 'taichi_mitsumeru', route: 'taichi' });
+  assert.equal(s.counters.taichi_mitsumeru, 2);
+});
+
+test('みつめる3回で taichi_delay が導出される', () => {
+  let s = baseState();
+  for (let i = 0; i < 2; i++) {
+    s = applyCommand(s, { next: 'x', count: 'taichi_mitsumeru', route: 'taichi' });
+  }
+  assert.equal(s.flags.taichi_delay, undefined);
+  s = applyCommand(s, { next: 'x', count: 'taichi_mitsumeru', route: 'taichi' });
+  assert.equal(s.flags.taichi_delay, true);
+});
+
+test('applyCommand は sendDeduction を deductions に積む', () => {
+  const s = applyCommand(baseState(), { next: 'x', sendDeduction: 'cat', route: 'junko' });
+  assert.deepEqual(s.deductions, ['cat']);
+});
+
+test('sendDeduction は重複を積まない', () => {
+  let s = applyCommand(baseState(), { next: 'x', sendDeduction: 'cat', route: 'junko' });
+  s = applyCommand(s, { next: 'y', sendDeduction: 'cat', route: 'junko' });
+  assert.deepEqual(s.deductions, ['cat']);
 });
