@@ -430,6 +430,7 @@
       "route": "junko",
       "chapter": 2,
       "chapterEnd": true,
+      "nextChapter": "ch3_junko_phone",
       "locationName": "井上肉店",
       "art": "nikuten",
       "description": "手帳に黒兵衛のことを書き加える。じゅんこの追跡は、ひとまずここまで。",
@@ -585,11 +586,272 @@
       "route": "taichi",
       "chapter": 2,
       "chapterEnd": true,
+      "nextChapter": "ch3_taichi_kichi",
       "locationName": "しまばらや（スーパー）",
       "art": "shimabaraya",
       "description": "西日が坂道を橙色に染める。たいちの二日目の聞き込みは、ここで一区切り。",
       "dialogue": [
         { "speaker": "たいち", "text": "さとる君、か。……今度こそ、電話しておくか。" }
+      ]
+    },
+    {
+      "sceneId": "ch3_junko_phone",
+      "route": "junko",
+      "chapter": 3,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "コードレス電話を手に取る。たいちの番号は、もう覚えてしまった。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "……もしもし、たいち？　こっちで分かったこと、話すわよ。" }
+      ],
+      "supportHint": [
+        { "dog": "raizo", "speaker": "雷蔵", "text": "（電話の受話器のコードにクンクン、鼻を寄せる）" },
+        { "dog": "hana", "speaker": "はな", "text": "（電話するじゅんこをジロリと見張っている）" },
+        { "dog": "kuranosuke", "speaker": "蔵之介", "text": "（電話台の下で早々にへそ天）" }
+      ],
+      "commands": [
+        { "text": "▶推理を送る（黒猫の話）", "next": "ch3_junko_sent_cat", "condition": { "flag": "info_black_cat" }, "sendDeduction": "cat" },
+        { "text": "▶推理を送る（黒い毛）", "next": "ch3_junko_sent_hair", "condition": { "flag": "evidence_black_hair" }, "sendDeduction": "hair" },
+        { "text": "▶推理を送る（泥の跡）", "next": "ch3_junko_sent_mud", "condition": { "flag": "evidence_mud" }, "sendDeduction": "mud" },
+        { "text": "▶章を終える", "next": "ch3_junko_done" }
+      ]
+    },
+    {
+      "sceneId": "ch3_junko_sent_cat",
+      "route": "junko",
+      "chapter": 3,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "黒兵衛の噂を、電話の向こうのたいちに伝える。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "この辺りに、黒兵衛っていう野良の黒猫がいるらしいの。" },
+        { "speaker": "たいち", "text": "黒猫……なるほど、覚えておく。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch3_junko_phone" }
+      ]
+    },
+    {
+      "sceneId": "ch3_junko_sent_hair",
+      "route": "junko",
+      "chapter": 3,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "クッションから見つけた黒い毛のことを伝える。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "ソファのクッションから、黒くて短い毛が出てきたのよ。" },
+        { "speaker": "たいち", "text": "黒い毛か。そっちで聞いたことと、繋がるかもな。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch3_junko_phone" }
+      ]
+    },
+    {
+      "sceneId": "ch3_junko_sent_mud",
+      "route": "junko",
+      "chapter": 3,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "ソファの下の泥の跡のことを伝える。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "ソファの下、乾いた泥の跡があったの。外から誰か入った跡ね。" },
+        { "speaker": "たいち", "text": "泥、か。……こっちでも、確かめてみるよ。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch3_junko_phone" }
+      ]
+    },
+    {
+      "sceneId": "ch3_junko_done",
+      "route": "junko",
+      "chapter": 3,
+      "chapterEnd": true,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "電話を切る。伝えるべきことは、伝えた。あとはたいち次第。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "……あとは、たいちがどこまで気づくかね。" }
+      ]
+    },
+    {
+      "sceneId": "ch3_taichi_kichi",
+      "route": "taichi",
+      "chapter": 3,
+      "locationName": "基地の街 バー通り",
+      "art": "kichi",
+      "description": "米軍基地の門から続く通り。ネオンはまだ点いていないが、さとる君は昼間からここにいた。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "さとる君、こんな時間から油売ってるのか。" },
+        { "speaker": "さとる君", "text": "……油？　休憩だよ。何の用だ、たいち。" }
+      ],
+      "supportHint": [
+        { "dog": "raizo", "speaker": "雷蔵", "text": "（さとる君の足元、紙袋の匂いをクンクン探る）" },
+        { "dog": "hana", "speaker": "はな", "text": "（さとる君をジロリと見て、目を逸らさない）" },
+        { "dog": "kuranosuke", "speaker": "蔵之介", "text": "（さとる君の靴のそばでさっそくへそ天）" }
+      ],
+      "commands": [
+        { "text": "▶きく（紙袋のこと）", "next": "ch3_taichi_ask_bag", "condition": { "flag": "info_satoru_bag" } },
+        { "text": "▶きく（黒猫を見なかったか）", "next": "ch3_taichi_ask_cat", "condition": { "deduction": "cat" } },
+        { "text": "▶きく（黒い毛のこと）", "next": "ch3_taichi_ask_hair", "condition": { "deduction": "hair" } },
+        { "text": "▶きく（泥の跡のこと）", "next": "ch3_taichi_ask_mud", "condition": { "deduction": "mud" } },
+        { "text": "▶バディに頼む", "next": "ch3_taichi_buddy" },
+        { "text": "▶章を終える", "next": "ch3_taichi_done" }
+      ]
+    },
+    {
+      "sceneId": "ch3_taichi_ask_bag",
+      "route": "taichi",
+      "chapter": 3,
+      "locationName": "基地の街 バー通り",
+      "art": "kichi",
+      "description": "紙袋のことを問い詰める。さとる君の目が、わずかに泳いだ。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "紙袋、提げて坂登ってたって話、聞いたぞ。" },
+        { "speaker": "さとる君", "text": "……ああ、あれか。別に、大したもんじゃねえよ。" },
+        { "speaker": "たいち", "text": "……にしては、目、逸らしたな今。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch3_taichi_kichi" }
+      ]
+    },
+    {
+      "sceneId": "ch3_taichi_ask_cat",
+      "route": "taichi",
+      "chapter": 3,
+      "locationName": "基地の街 バー通り",
+      "art": "kichi",
+      "description": "じゅんこから聞いた黒猫の話を、さとる君にぶつける。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "黒兵衛って野良猫、この辺で見かけなかったか？" },
+        { "speaker": "さとる君", "text": "黒猫……ああ、たまにうろついてるな。人懐っこいやつだ。" },
+        { "speaker": "たいち", "text": "うちにも上がり込んでるかもしれないってな。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch3_taichi_kichi" }
+      ]
+    },
+    {
+      "sceneId": "ch3_taichi_ask_hair",
+      "route": "taichi",
+      "chapter": 3,
+      "locationName": "基地の街 バー通り",
+      "art": "kichi",
+      "description": "黒い毛のことを、さとる君に確かめる。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "うちのソファから、黒くて短い毛が出てきたんだが。" },
+        { "speaker": "さとる君", "text": "……それ、猫の毛じゃねえのか。よくいるあの黒猫の。" },
+        { "speaker": "たいち", "text": "……お前、詳しいな。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch3_taichi_kichi" }
+      ]
+    },
+    {
+      "sceneId": "ch3_taichi_ask_mud",
+      "route": "taichi",
+      "chapter": 3,
+      "locationName": "基地の街 バー通り",
+      "art": "kichi",
+      "description": "ソファの下の泥の跡のことを、さとる君にぶつける。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "うちのソファの下、乾いた泥の跡があったんだが。" },
+        { "speaker": "さとる君", "text": "……泥？　さあな。俺の靴は、いつも綺麗にしてるぜ。" },
+        { "speaker": "たいち", "text": "……誰も靴の話はしてないんだが。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch3_taichi_kichi" }
+      ]
+    },
+    {
+      "sceneId": "ch3_taichi_buddy",
+      "route": "taichi",
+      "chapter": 3,
+      "locationName": "基地の街 バー通り",
+      "art": "kichi",
+      "description": "バディの犬に合図を出す。さて、何をしてもらおうか。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "よし、お前の力を借りるぞ。" }
+      ],
+      "commands": [
+        { "text": "▶クンクンする", "next": "ch3_taichi_raizo", "condition": { "buddy": "raizo" } },
+        { "text": "▶ジロリとみる", "next": "ch3_taichi_hana", "condition": { "buddy": "hana" } },
+        { "text": "▶へそ天", "next": "ch3_taichi_kuranosuke_rage", "condition": { "allOf": [{ "buddy": "kuranosuke" }, { "flag": "info_satoru_bag" }] } },
+        { "text": "▶へそ天", "next": "ch3_taichi_kuranosuke_idle", "condition": { "allOf": [{ "buddy": "kuranosuke" }, { "not": { "flag": "info_satoru_bag" } }] } }
+      ]
+    },
+    {
+      "sceneId": "ch3_taichi_raizo",
+      "route": "taichi",
+      "chapter": 3,
+      "locationName": "基地の街 バー通り",
+      "art": "raizo",
+      "description": "雷蔵がさとる君の足元、紙袋の残り香を追って、通りの奥のゴミ置き場に鼻を突き込む。",
+      "dialogue": [
+        { "speaker": "雷蔵", "text": "……クンクン。この下、何か埋めた匂いがするぜ。" },
+        { "speaker": "たいち", "text": "……おい、待て。それ、空箱じゃないか。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch3_taichi_kichi", "setFlag": "found_empty_box" }
+      ]
+    },
+    {
+      "sceneId": "ch3_taichi_hana",
+      "route": "taichi",
+      "chapter": 3,
+      "locationName": "基地の街 バー通り",
+      "art": "hana",
+      "description": "はながさとる君を、ただじっとジロリと見つめる。さとる君、居心地悪そうに視線を逸らす。",
+      "dialogue": [
+        { "speaker": "はな", "text": "……（さとる君をジロリと見つめたまま、動かない）" },
+        { "speaker": "さとる君", "text": "……なんだよ、その目。俺は何もしてねえって。" },
+        { "speaker": "たいち", "text": "（誰も聞いてないのに、自分から言い出したな）" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch3_taichi_kichi" }
+      ]
+    },
+    {
+      "sceneId": "ch3_taichi_kuranosuke_rage",
+      "route": "taichi",
+      "chapter": 3,
+      "locationName": "基地の街 バー通り",
+      "art": "kuranosuke",
+      "description": "へそ天のはずの蔵之介、紙袋の匂いを嗅いだ瞬間、突然立ち上がり牙を剥いた。",
+      "dialogue": [
+        { "speaker": "蔵之介", "text": "……（へそ天）……ハッ！？" },
+        { "speaker": "蔵之介", "text": "ウォンッ！！　ウーッ、ウーッ！！（狂犬化）" },
+        { "speaker": "たいち", "text": "な、なんだ急に！？　お前、今まで寝てただろ！？" },
+        { "speaker": "蔵之介", "text": "（ゴミ置き場に飛び込み、空箱を口で引っ張り出す）" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch3_taichi_kichi", "setFlag": "found_empty_box" }
+      ]
+    },
+    {
+      "sceneId": "ch3_taichi_kuranosuke_idle",
+      "route": "taichi",
+      "chapter": 3,
+      "locationName": "基地の街 バー通り",
+      "art": "kuranosuke",
+      "description": "蔵之介、呼ばれた途端に腹を見せて転がる。今日も特に何も起きない。",
+      "dialogue": [
+        { "speaker": "蔵之介", "text": "……（へそ天。基地の街でも変わらず仕事はしない）" },
+        { "speaker": "たいち", "text": "お前だけは、どこでも同じだな。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch3_taichi_kichi" }
+      ]
+    },
+    {
+      "sceneId": "ch3_taichi_done",
+      "route": "taichi",
+      "chapter": 3,
+      "chapterEnd": true,
+      "locationName": "基地の街 バー通り",
+      "art": "kichi",
+      "description": "日が暮れて、ネオンが灯り始める。たいちの三日目の聞き込みは、ここで一区切り。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "……さとる君、か。あとは、家に帰って確かめるだけだ。" }
       ]
     }
   ]

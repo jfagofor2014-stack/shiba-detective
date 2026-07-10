@@ -179,3 +179,43 @@ test('第2章の「みつめる」は2箇所あり、はなの時は出ない', 
     assert.deepEqual(c.condition, { buddyNot: 'hana' });
   }
 });
+
+test('送れる推理と受け取れる推理が一対一で対応する', () => {
+  const s = loadScenario(raw);
+  const cmds = [...s.scenes.values()].flatMap((sc) => sc.commands ?? []);
+  const sent = new Set(cmds.filter((c) => c.sendDeduction).map((c) => c.sendDeduction));
+  const received = new Set(
+    cmds.filter((c) => c.condition?.deduction).map((c) => c.condition.deduction)
+  );
+  assert.deepEqual([...sent].sort(), ['cat', 'hair', 'mud']);
+  assert.deepEqual([...received].sort(), ['cat', 'hair', 'mud']);
+});
+
+test('推理を送るコマンドは対応するフラグを条件に持つ', () => {
+  const s = loadScenario(raw);
+  const byDeduction = Object.fromEntries(
+    [...s.scenes.values()].flatMap((sc) => sc.commands ?? [])
+      .filter((c) => c.sendDeduction).map((c) => [c.sendDeduction, c.condition])
+  );
+  assert.deepEqual(byDeduction.cat, { flag: 'info_black_cat' });
+  assert.deepEqual(byDeduction.hair, { flag: 'evidence_black_hair' });
+  assert.deepEqual(byDeduction.mud, { flag: 'evidence_mud' });
+});
+
+test('found_empty_box は雷蔵と蔵之介の2経路でのみ取れる', () => {
+  const s = loadScenario(raw);
+  const setters = [...s.scenes.values()]
+    .flatMap((sc) => (sc.commands ?? []).map((c) => [sc.sceneId, c]))
+    .filter(([, c]) => c.setFlag === 'found_empty_box')
+    .map(([id]) => id);
+  assert.deepEqual(setters.sort(), ['ch3_taichi_kuranosuke_rage', 'ch3_taichi_raizo']);
+});
+
+test('蔵之介の狂犬化は info_satoru_bag を要求する（乱数を使わない）', () => {
+  const s = loadScenario(raw);
+  const rage = s.scenes.get('ch3_taichi_buddy').commands
+    .find((c) => c.next === 'ch3_taichi_kuranosuke_rage');
+  assert.deepEqual(rage.condition, {
+    allOf: [{ buddy: 'kuranosuke' }, { flag: 'info_satoru_bag' }],
+  });
+});
