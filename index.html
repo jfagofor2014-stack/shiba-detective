@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>柴犬探偵団 〜リビングに消ゆ〜</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-phosphor="green">
+  <div id="scanlines" aria-hidden="true"></div>
+
+  <main id="game" hidden>
+    <header id="status">
+      <span id="status-location"></span>
+      <span id="status-buddy"></span>
+      <span id="status-route"></span>
+    </header>
+    <section id="art" aria-label="場面"></section>
+    <section id="dialogue" aria-live="polite"></section>
+    <footer id="commands">
+      <p class="label">【コマンド】</p>
+      <ol id="command-list"></ol>
+    </footer>
+    <aside id="feed" aria-live="polite" aria-label="相棒からの報せ"></aside>
+  </main>
+
+  <section id="lobby">
+    <h1>柴犬探偵団<small>〜リビングに消ゆ〜</small></h1>
+    <div id="lobby-body"></div>
+  </section>
+
+  <button id="phosphor-toggle" type="button">COLOR</button>
+  <button id="sound-toggle" type="button" aria-pressed="false">SOUND OFF</button>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
