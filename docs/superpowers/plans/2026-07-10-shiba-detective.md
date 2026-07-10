@@ -1517,6 +1517,7 @@ body {
   background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,.28) 2px 4px);
 }
 #game { display: grid; grid-template-rows: auto 1fr auto auto; gap: 0; max-width: 760px; margin: 0 auto; min-height: 100dvh; }
+#game[hidden] { display: none; }  /* ID指定は [hidden] のUA規則(display:none)を上書きするため、明示的に隠す */
 #status, #dialogue, #commands, #art { border: 1px solid var(--phosphor); margin: -1px 0 0; padding: .6em .9em; }
 #status { display: flex; flex-wrap: wrap; gap: 1.2em; font-size: .85em; }
 #art { display: grid; place-items: center; padding: 1em; }
