@@ -1,0 +1,298 @@
+{
+  "start": { "junko": "ch1_junko_living", "taichi": "ch1_taichi_entrance" },
+  "feedText": {
+    "evidence_mud": "じゅんこ：ソファの下に、乾いた泥の跡を見つけた",
+    "evidence_black_hair": "じゅんこ：クッションの隙間から、黒くて短い毛を摘まみ上げた",
+    "heard_shadow": "たいち：お母さんが、夕方に黒い影を見たと言っている",
+    "suspicious_father": "たいち：お父さんの受け答えが、どうにも歯切れが悪い",
+    "info_black_cat": "じゅんこ：井上肉店のおばちゃんが、黒兵衛の噂を教えてくれた",
+    "info_satoru_bag": "たいち：さとる君が紙袋を提げて坂を登っていったらしい",
+    "found_empty_box": "たいち：空になったお魚クッキーの箱を押さえた"
+  },
+  "scenes": [
+    {
+      "sceneId": "ch1_junko_living",
+      "route": "junko",
+      "chapter": 1,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "カーテンの隙間から西日。ローテーブルの上に、空になった皿だけが残っている。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "……お魚クッキー、まるまる一袋。犯人はこの家にいる。" }
+      ],
+      "supportHint": [
+        { "dog": "raizo", "speaker": "雷蔵", "text": "（部屋の隅でクンクン、鼻を鳴らしている）" },
+        { "dog": "hana", "speaker": "はな", "text": "（じゅんこをジロリと見て、早く探せと言いたげ）" },
+        { "dog": "kuranosuke", "speaker": "蔵之介", "text": "（お腹を見せて寝ている）" }
+      ],
+      "commands": [
+        { "text": "▶しらべる（ソファ）", "next": "ch1_junko_sofa" },
+        { "text": "▶しらべる（ソファの隙間）", "next": "ch1_junko_sofa_gap", "condition": { "flag": "evidence_mud" } },
+        { "text": "▶バディに頼む", "next": "ch1_junko_buddy" },
+        { "text": "▶みつめる（窓の外）", "next": "ch1_junko_window" },
+        { "text": "▶章を終える", "next": "ch1_junko_done", "condition": { "flag": "evidence_mud" } }
+      ]
+    },
+    {
+      "sceneId": "ch1_junko_sofa",
+      "route": "junko",
+      "chapter": 1,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "ソファをずらすと、床に乾いた泥の粒がいくつか落ちている。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "……泥？　うちの誰かが、外から入ってきた跡ね。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_junko_living", "setFlag": "evidence_mud" }
+      ]
+    },
+    {
+      "sceneId": "ch1_junko_sofa_gap",
+      "route": "junko",
+      "chapter": 1,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "泥の跡をたどって、クッションの隙間に指を入れる。何かがひっかかった。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "黒くて短い毛……うちに、黒い動物なんていたかしら。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_junko_living", "setFlag": "evidence_black_hair" }
+      ]
+    },
+    {
+      "sceneId": "ch1_junko_buddy",
+      "route": "junko",
+      "chapter": 1,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "バディの犬に合図を出す。さて、何をしてもらおうか。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "お願い、力を借りるわよ。" }
+      ],
+      "commands": [
+        { "text": "▶クンクンする", "next": "ch1_junko_raizo", "condition": { "buddy": "raizo" } },
+        { "text": "▶ジロリとみる", "next": "ch1_junko_hana", "condition": { "buddy": "hana" } },
+        { "text": "▶へそ天", "next": "ch1_junko_kuranosuke", "condition": { "buddy": "kuranosuke" } }
+      ]
+    },
+    {
+      "sceneId": "ch1_junko_raizo",
+      "route": "junko",
+      "chapter": 1,
+      "locationName": "自宅 2階リビング",
+      "art": "raizo",
+      "description": "雷蔵がソファに鼻を近づけ、一度だけ大きく吸い込む。",
+      "dialogue": [
+        { "speaker": "雷蔵", "text": "……クンクン。クッションの奥、黒い毛の匂いがするぜ。" },
+        { "speaker": "じゅんこ", "text": "隙間を探さなくても分かるのね。さすがだわ。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_junko_living", "setFlag": "evidence_black_hair" }
+      ]
+    },
+    {
+      "sceneId": "ch1_junko_hana",
+      "route": "junko",
+      "chapter": 1,
+      "locationName": "自宅 2階リビング",
+      "art": "hana",
+      "description": "はなが空の皿をジロリと見つめる。皿に罪はないのだが。",
+      "dialogue": [
+        { "speaker": "はな", "text": "……（じっと皿を見ている。何も語らない）" },
+        { "speaker": "じゅんこ", "text": "皿を見張っても、もう戻ってこないと思うわ。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_junko_living" }
+      ]
+    },
+    {
+      "sceneId": "ch1_junko_kuranosuke",
+      "route": "junko",
+      "chapter": 1,
+      "locationName": "自宅 2階リビング",
+      "art": "kuranosuke",
+      "description": "蔵之介、呼ばれた途端に腹を見せて転がる。",
+      "dialogue": [
+        { "speaker": "蔵之介", "text": "……（へそ天。仕事をする気は特にない）" },
+        { "speaker": "じゅんこ", "text": "はいはい、かわいいわね。捜査には貢献ゼロだけど。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_junko_living" }
+      ]
+    },
+    {
+      "sceneId": "ch1_junko_window",
+      "route": "junko",
+      "chapter": 1,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "窓の外、夕暮れの坂道を誰かが下りていくのが見える。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "……今の人影、近所の誰かよね。覚えておこう。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_junko_living" }
+      ]
+    },
+    {
+      "sceneId": "ch1_junko_done",
+      "route": "junko",
+      "chapter": 1,
+      "chapterEnd": true,
+      "locationName": "自宅 2階リビング",
+      "art": "living",
+      "description": "手がかりを手帳にまとめる。じゅんこの捜査は、ひとまずここまで。",
+      "dialogue": [
+        { "speaker": "じゅんこ", "text": "あとはたいちの方ね。まさか、寝てないでしょうけど。" }
+      ]
+    },
+    {
+      "sceneId": "ch1_taichi_entrance",
+      "route": "taichi",
+      "chapter": 1,
+      "locationName": "自宅 玄関",
+      "art": "entrance",
+      "description": "玄関先。犬の散歩用リードが、乱雑に丸めて放置されている。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "お魚クッキー消失事件、か。俺が呼ばれるとはね。" }
+      ],
+      "supportHint": [
+        { "dog": "raizo", "speaker": "雷蔵", "text": "（玄関の匂いを覚えておこうと鼻を鳴らす）" },
+        { "dog": "hana", "speaker": "はな", "text": "（たいちを一瞬だけジロリと見る）" },
+        { "dog": "kuranosuke", "speaker": "蔵之介", "text": "（すでに玄関マットでへそ天）" }
+      ],
+      "commands": [
+        { "text": "▶きく（お母さんに）", "next": "ch1_taichi_mother" },
+        { "text": "▶きく（お父さんに）", "next": "ch1_taichi_father" },
+        { "text": "▶しらべる（ゴミ箱）", "next": "ch1_taichi_trash" },
+        { "text": "▶バディに頼む", "next": "ch1_taichi_buddy" },
+        { "text": "▶章を終える", "next": "ch1_taichi_done", "condition": { "anyOf": [{ "flag": "heard_shadow" }, { "flag": "suspicious_father" }] } }
+      ]
+    },
+    {
+      "sceneId": "ch1_taichi_mother",
+      "route": "taichi",
+      "chapter": 1,
+      "locationName": "自宅 玄関",
+      "art": "entrance",
+      "description": "お母さんは洗濯物を干す手を止めて、たいちの方を向いた。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "お母さん、クッキーの件、何か見てない？" },
+        { "speaker": "お母さん", "text": "そういえば……夕方、庭の隅に黒い影が見えた気がして。" },
+        { "speaker": "たいち", "text": "影？　猫とか？" },
+        { "speaker": "お母さん", "text": "さあ、暗くてよく見えなかったのよ。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_taichi_entrance", "setFlag": "heard_shadow" }
+      ]
+    },
+    {
+      "sceneId": "ch1_taichi_father",
+      "route": "taichi",
+      "chapter": 1,
+      "locationName": "自宅 玄関",
+      "art": "entrance",
+      "description": "お父さんは新聞を広げたまま、視線をわずかに逸らした。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "お父さん、クッキーのこと、何か知らない？" },
+        { "speaker": "お父さん", "text": "……いや、知らんな。俺は何も。うん、何も。" },
+        { "speaker": "たいち", "text": "……『何も』を二回言った？" },
+        { "speaker": "お父さん", "text": "気のせいだ。新聞を読んでいるだけだ。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_taichi_entrance", "setFlag": "suspicious_father" }
+      ]
+    },
+    {
+      "sceneId": "ch1_taichi_trash",
+      "route": "taichi",
+      "chapter": 1,
+      "locationName": "自宅 玄関",
+      "art": "entrance",
+      "description": "ゴミ箱を覗くと、空き缶とレシートの山。事件性は薄そうだ。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "……特に何もないな。時間の無駄だったか。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_taichi_entrance" }
+      ]
+    },
+    {
+      "sceneId": "ch1_taichi_buddy",
+      "route": "taichi",
+      "chapter": 1,
+      "locationName": "自宅 玄関",
+      "art": "entrance",
+      "description": "バディの犬に合図を出す。さて、何をしてもらおうか。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "よし、お前の力を借りるぞ。" }
+      ],
+      "commands": [
+        { "text": "▶クンクンする", "next": "ch1_taichi_raizo", "condition": { "buddy": "raizo" } },
+        { "text": "▶ジロリとみる", "next": "ch1_taichi_hana", "condition": { "buddy": "hana" } },
+        { "text": "▶へそ天", "next": "ch1_taichi_kuranosuke", "condition": { "buddy": "kuranosuke" } }
+      ]
+    },
+    {
+      "sceneId": "ch1_taichi_raizo",
+      "route": "taichi",
+      "chapter": 1,
+      "locationName": "自宅 玄関",
+      "art": "raizo",
+      "description": "雷蔵が玄関から庭先へ、鼻を低くして歩き回る。",
+      "dialogue": [
+        { "speaker": "雷蔵", "text": "……クンクン。外の匂いは薄いな。坂の方まで行けば分かるかもな。" },
+        { "speaker": "たいち", "text": "坂の方、か。今度そっちも見てみるか。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_taichi_entrance" }
+      ]
+    },
+    {
+      "sceneId": "ch1_taichi_hana",
+      "route": "taichi",
+      "chapter": 1,
+      "locationName": "自宅 玄関",
+      "art": "hana",
+      "description": "はなが縁側から、新聞を読むお父さんをじっと見つめる。何も言わない。",
+      "dialogue": [
+        { "speaker": "はな", "text": "……（黙って、お父さんをジロリと見つめ続ける）" },
+        { "speaker": "お父さん", "text": "……な、なんだその目は。別に、何も隠してなどいないぞ。" },
+        { "speaker": "お父さん", "text": "……ちょっとトイレに行ってくる。" },
+        { "speaker": "たいち", "text": "（誰も何も聞いてないのに、勝手にしゃべり始めたな）" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_taichi_entrance", "setFlag": "suspicious_father" }
+      ]
+    },
+    {
+      "sceneId": "ch1_taichi_kuranosuke",
+      "route": "taichi",
+      "chapter": 1,
+      "locationName": "自宅 玄関",
+      "art": "kuranosuke",
+      "description": "蔵之介、呼ばれた途端に腹を見せて転がる。二回目でも同じ。",
+      "dialogue": [
+        { "speaker": "蔵之介", "text": "……（へそ天。今日も仕事はしない）" },
+        { "speaker": "たいち", "text": "お前、うちで一番働いてないと思うぞ。" }
+      ],
+      "commands": [
+        { "text": "▶もどる", "next": "ch1_taichi_entrance" }
+      ]
+    },
+    {
+      "sceneId": "ch1_taichi_done",
+      "route": "taichi",
+      "chapter": 1,
+      "chapterEnd": true,
+      "locationName": "自宅 玄関",
+      "art": "entrance",
+      "description": "陽が落ちる。たいちの一日目の聞き込みは、ここで一区切り。",
+      "dialogue": [
+        { "speaker": "たいち", "text": "じゅんこの方はどうだったかな。……電話するの、忘れてたわ。" }
+      ]
+    }
+  ]
+}
