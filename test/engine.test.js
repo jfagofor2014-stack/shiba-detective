@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluate, contextFor, visibleCommands, applyCommand } from '../src/engine.js';
+import { evaluate, contextFor, visibleCommands, applyCommand, DERIVED_FLAGS } from '../src/engine.js';
 
 const ctx = (over = {}) => ({
   flags: {}, counters: {}, buddy: 'raizo', support: 'hana', deductions: [], ...over,
@@ -137,4 +137,54 @@ test('sendDeduction は重複を積まない', () => {
   let s = applyCommand(baseState(), { next: 'x', sendDeduction: 'cat', route: 'junko' });
   s = applyCommand(s, { next: 'y', sendDeduction: 'cat', route: 'junko' });
   assert.deepEqual(s.deductions, ['cat']);
+});
+
+// --- Fix 1: applyCommand は sceneId / deductions のエイリアスを返してはいけない ---
+
+test('applyCommand は next も sendDeduction も無い場合でも sceneId と deductions を新しい参照で返す', () => {
+  const s = baseState();
+  const next = applyCommand(s, { text: '', setFlag: 'evidence_mud', route: 'junko' });
+  assert.notEqual(next.sceneId, s.sceneId);
+  assert.deepEqual(next.sceneId, s.sceneId);
+  assert.notEqual(next.deductions, s.deductions);
+  assert.deepEqual(next.deductions, s.deductions);
+});
+
+// --- Fix 2: DERIVED_FLAGS は評価対象の route を明示し、実行コマンドの route に依存しない ---
+
+test('DERIVED_FLAGS の各エントリは route を明示する', () => {
+  const entry = DERIVED_FLAGS.find((d) => d.flag === 'taichi_delay');
+  assert.equal(entry.route, 'taichi');
+});
+
+test('taichi_delay の導出は、みつめるを積んだコマンドの route が junko でも成立する', () => {
+  let s = baseState();
+  for (let i = 0; i < 3; i++) {
+    s = applyCommand(s, { next: 'x', count: 'taichi_mitsumeru', route: 'junko' });
+  }
+  assert.equal(s.flags.taichi_delay, true);
+});
+
+// --- Fix 3: command.route は scene.route から必ず引き継がれる ---
+
+test('visibleCommands は各コマンドに scene.route を付与する（元のコマンドは変更しない）', () => {
+  const scene = {
+    sceneId: 'x', route: 'taichi',
+    commands: [{ text: 'A', next: 'a' }],
+  };
+  const got = visibleCommands(scene, baseState());
+  assert.equal(got[0].route, 'taichi');
+  assert.equal(scene.commands[0].route, undefined);
+});
+
+test('applyCommand は command.route が無いと例外を投げる', () => {
+  assert.throws(() => applyCommand(baseState(), { next: 'x' }), /command\.route/);
+});
+
+test('applyCommand は command.route が不正な値だと例外を投げる', () => {
+  assert.throws(() => applyCommand(baseState(), { next: 'x', route: 'nope' }), /command\.route/);
+});
+
+test('applyCommand は route:"common" に next が付いていると例外を投げる', () => {
+  assert.throws(() => applyCommand(baseState(), { next: 'x', route: 'common' }), /command\.route/);
 });

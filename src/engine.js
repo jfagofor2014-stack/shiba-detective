@@ -18,7 +18,7 @@ export function evaluate(condition, ctx) {
 }
 
 export const DERIVED_FLAGS = [
-  { flag: 'taichi_delay', when: { countAtLeast: ['taichi_mitsumeru', 3] } },
+  { flag: 'taichi_delay', route: 'taichi', when: { countAtLeast: ['taichi_mitsumeru', 3] } },
 ];
 
 export function contextFor(state, route) {
@@ -34,14 +34,29 @@ export function contextFor(state, route) {
 export function visibleCommands(scene, state) {
   if (!scene.commands) return [];
   const ctx = contextFor(state, scene.route);
-  return scene.commands.filter((c) => evaluate(c.condition, ctx));
+  return scene.commands
+    .filter((c) => evaluate(c.condition, ctx))
+    .map((c) => ({ ...c, route: scene.route }));
 }
+
+const VALID_ROUTES = ['junko', 'taichi', 'common'];
 
 export function applyCommand(state, command) {
   const route = command.route;
+  if (!VALID_ROUTES.includes(route)) {
+    throw new Error(
+      `applyCommand: command.route must be 'junko', 'taichi', or 'common' (got ${JSON.stringify(route)})`
+    );
+  }
+  if (command.next && route === 'common') {
+    throw new Error(
+      "applyCommand: command.route 'common' cannot be combined with command.next"
+    );
+  }
+
   const flags = { ...state.flags };
   const counters = { ...state.counters };
-  let deductions = state.deductions;
+  let deductions = [...state.deductions];
 
   if (command.setFlag) flags[command.setFlag] = true;
   if (command.count) counters[command.count] = (counters[command.count] ?? 0) + 1;
@@ -49,16 +64,20 @@ export function applyCommand(state, command) {
     deductions = [...deductions, command.sendDeduction];
   }
 
+  const sceneId = command.next
+    ? { ...state.sceneId, [route]: command.next }
+    : { ...state.sceneId };
+
   const next = {
     ...state,
     flags,
     counters,
     deductions,
-    sceneId: command.next ? { ...state.sceneId, [route]: command.next } : state.sceneId,
+    sceneId,
   };
 
-  for (const { flag, when } of DERIVED_FLAGS) {
-    if (evaluate(when, contextFor(next, route))) next.flags[flag] = true;
+  for (const { flag, route: flagRoute, when } of DERIVED_FLAGS) {
+    if (evaluate(when, contextFor(next, flagRoute))) next.flags[flag] = true;
   }
   return next;
 }
