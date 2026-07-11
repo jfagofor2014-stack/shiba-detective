@@ -1893,6 +1893,9 @@ git commit -m "feat: 1人プレイで全4章を通せるようにする"
 export function createSound() {
   let ctx = null;
   let enabled = false;
+  let lastBlipAt = -Infinity;
+  const BLIP_MIN_INTERVAL = 0.015; // 秒(AudioContext時間)。skip()で一気に流れた文字ぶんの
+  // blip()が同一tickで重なり振幅加算でクリッピングするのを防ぐ。jingle()は対象外。
 
   const ensure = () => (ctx ??= new (window.AudioContext ?? window.webkitAudioContext)());
 
@@ -1912,7 +1915,13 @@ export function createSound() {
   return {
     get enabled() { return enabled; },
     toggle() { enabled = !enabled; if (enabled) ensure(); return enabled; },
-    blip() { tone(880, 12); },
+    blip() {
+      if (!enabled) return;
+      const now = ensure().currentTime;
+      if (now - lastBlipAt < BLIP_MIN_INTERVAL) return;
+      lastBlipAt = now;
+      tone(880, 12);
+    },
     jingle() { [660, 880, 1320].forEach((f, i) => setTimeout(() => tone(f, 90, 0.05), i * 90)); },
   };
 }
