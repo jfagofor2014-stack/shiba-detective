@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "rooms": {
+      "$code": {
+        ".read": "auth != null",
+        ".write": "auth != null && (!data.exists() || data.child('expiresAt').val() > now)",
+        ".validate": "newData.hasChildren(['createdAt', 'expiresAt', 'phase'])",
+        "expiresAt": { ".validate": "newData.isNumber() && newData.val() <= now + 86400000" }
+      }
+    }
+  }
+}
