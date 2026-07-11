@@ -51,7 +51,7 @@ function draw() {
   const scene = currentScene();
   renderStatus(el.status, {
     locationName: scene.locationName ?? '—',
-    buddyLabel: scene.route === 'common' ? '三頭' : DOG_LABEL[state.buddies[scene.route]],
+    buddyLabel: scene.route === 'common' ? ROUTE_LABEL.common : DOG_LABEL[state.buddies[scene.route]],
     routeLabel: ROUTE_LABEL[scene.route],
   });
   renderArt(el.art, scene.art);
@@ -81,6 +81,8 @@ function drawCommands() {
     const endingId = endingSceneId(ending, state.flags);
     state = { ...state, ending, sceneId: { ...state.sceneId, junko: endingId, taichi: endingId } };
     saveState(state, localStorage);
+    // 2人プレイ: エンディング確定を部屋にも反映する（失敗は握りつぶしてローカルで続行）。
+    if (conn && roomCode) pushState(conn, roomCode, state).catch(() => {});
     return draw();
   }
 
@@ -110,7 +112,9 @@ function drawCommands() {
     return renderCommands(el.commandList, [{ text: '▶最初から', restart: true }], pick);
   }
 
-  const cmds = visibleCommands(scene, state).map((c) => ({ ...c, route: scene.route }));
+  // visibleCommands() は返す各コマンドに既に route: scene.route を刻んでいるので、
+  // ここで再度 .map() で同じ値を上書きする必要はない。
+  const cmds = visibleCommands(scene, state);
   renderCommands(el.commandList, [...cmds, ...switchRouteCommand()], pick);
 }
 
@@ -225,9 +229,15 @@ function startWatching() {
     const beforeFlags = new Set(Object.keys(state.flags));
     const beforeDeductions = state.deductions.length;
     const mine = state.sceneId[myRoute];   // 自分のシーンは相手に上書きさせない
+    // 両ルートが既に同じ ch4_* シーン（共有フィナーレ合流後）を指しているなら、
+    // ここから先は「自分のシーン」という概念自体がなく、相手の操作（推理を
+    // 突き合わせる／エンディング確定）にも追従すべき。その場合は mine への
+    // 巻き戻しをせず、mergeRemote が取り込んだ最新値をそのまま使わせる。
+    const wasInFinale =
+      state.sceneId.junko === state.sceneId.taichi && state.sceneId.junko?.startsWith('ch4_');
 
     state = mergeRemote(state, remote);
-    state.sceneId[myRoute] = mine;
+    if (!wasInFinale) state.sceneId[myRoute] = mine;
     syncChapters();
     saveState(state, localStorage);
 
@@ -239,6 +249,9 @@ function startWatching() {
     }
 
     if (bothChapterEnded()) return enterFinale();
+    // 共有フィナーレ合流後、相手の操作で自分のシーンが実際に進んだ場合は
+    // セリフ・アートも入れ替わるので draw() で全体を再描画する。
+    if (wasInFinale && state.sceneId[myRoute] !== mine) return draw();
     // 相手の推理が届いた時だけコマンドを引き直す。自分のシーンは動いていないので draw() はしない
     if (state.deductions.length !== beforeDeductions) drawCommands();
   });
@@ -451,6 +464,8 @@ conn = await initFirebase();
 
 const saved = loadState(localStorage);
 if (saved) {
+  // 再開時は保存されたゲーム状態のみを復元する。2人プレイのルーム接続(conn/myRoute/roomCode)は
+  // 永続化していないため、リロード後は常に1人プレイの両視点切替として再開する(既知の制約)。
   state = saved;
   el.lobby.hidden = true;
   el.game.hidden = false;
