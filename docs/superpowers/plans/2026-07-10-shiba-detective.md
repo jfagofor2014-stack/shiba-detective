@@ -1715,7 +1715,9 @@ function drawCommands() {
 
   if (scene.chapterEnd) {
     const cmds = [];
-    if (scene.nextChapter) {
+    // ch3→ch4 は共有フィナーレへの合流。片方だけ先に入れてはならない
+    // （合流は pick() 内の bothChapterEnded()→enterFinale() が自動で行う）。
+    if (scene.nextChapter && scene.nextChapter !== 'ch4_finale_intro') {
       cmds.push({ text: '▶次の章へ', next: scene.nextChapter, route });
     }
     cmds.push(...switchRouteCommand());
