@@ -3,9 +3,12 @@ import { createState, saveState, loadState, clearState, DOGS } from './state.js'
 import { visibleCommands, applyCommand, resolveEnding, endingSceneId } from './engine.js';
 import { renderStatus, renderArt, renderDialogue, renderCommands, appendFeed } from './ui/screen.js';
 import { createSound } from './ui/sound.js';
+import { initFirebase } from './net/firebase.js';
+import { createRoom, joinRoom, watchRoom, claimBuddy, pushState, mergeRemote, generateCode } from './net/room.js';
 
 const DOG_LABEL = { raizo: '雷蔵', hana: 'はな', kuranosuke: '蔵之介' };
 const ROUTE_LABEL = { junko: 'じゅんこ', taichi: 'たいち', common: '一同' };
+const PARTNER_WAIT_MS = 45000;
 
 const el = {
   game: document.getElementById('game'),
@@ -21,9 +24,15 @@ const el = {
 const scenario = loadScenario(await fetch('data/scenario.json').then((r) => r.json()));
 
 let state = null;
-let route = 'junko';      // 1人プレイで現在操作している視点
+let route = 'junko';      // 1人プレイで現在操作している視点。2人プレイでは myRoute に固定する。
 let typing = null;
 const sound = createSound();
+
+// ---- 2人プレイの接続状態 ----
+let conn = null;          // null なら1人プレイ（Task14: initFirebase は失敗時に null を返す）
+let roomCode = null;
+let myRoute = null;       // 2人プレイで自分が操作する側。1人プレイでは null
+let partnerWaitCancel = null; // 章末で相手を待つ45秒タイマーの解除関数
 
 function currentScene() {
   return scenario.scenes.get(state.sceneId[route]);
@@ -53,6 +62,10 @@ function draw() {
 }
 
 function drawCommands() {
+  // 章末で相手を待つタイマーは、コマンドが引き直された時点で一旦解除する。
+  // 再度「待つしかない」状態と判定された場合はこの下でまた張り直す。
+  cancelPartnerWait();
+
   const scene = currentScene();
 
   if (scene.resolvesEnding) {
@@ -78,7 +91,14 @@ function drawCommands() {
       cmds.push({ text: '▶次の章へ', next: scene.nextChapter, route });
     }
     cmds.push(...switchRouteCommand());
-    return renderCommands(el.commandList, cmds, pick);
+    renderCommands(el.commandList, cmds, pick);
+    // 2人プレイで、自分は既に第3章末に到達しコマンドが尽きた（=視点固定で
+    // 切り替えも出せない）場合、相手の追いつきを待つしかない。45秒待って
+    // まだ合流していなければ「▶ひとりで結論を出す」を出す（設計書§5.5）。
+    if (conn && roomCode && cmds.length === 0) {
+      partnerWaitCancel = waitForPartner();
+    }
+    return;
   }
 
   if (scene.sceneId.startsWith('ch4_ending_')) {
@@ -90,7 +110,8 @@ function drawCommands() {
 }
 
 /**
- * 1人プレイ専用: もう一方の視点へ切り替える。
+ * 1人プレイ専用: もう一方の視点へ切り替える。2人プレイでは自分の視点に固定され、
+ * このコマンドは常に出さない（互いに相手のルートを操作できてはならない）。
  * 両ルートが同じシーンID（=第4章の合流後）に立っている間は出さない。
  * currentScene().route === 'common' だけで判定すると、片方のルートだけが
  * 先に ch4_finale_intro（common）へ進んだ瞬間に切替ボタンが消えてしまい、
@@ -98,9 +119,25 @@ function drawCommands() {
  * 両ルートの sceneId が実際に一致しているかどうかで判定する。
  */
 function switchRouteCommand() {
+  if (conn && roomCode) return [];              // 2人プレイでは自分の視点に固定
   if (state.sceneId.junko === state.sceneId.taichi) return [];
   const other = route === 'junko' ? 'taichi' : 'junko';
   return [{ text: `▶視点を${ROUTE_LABEL[other]}に切り替える`, switchTo: other }];
+}
+
+/** 章末で相手が第4章に来ない場合、45秒後に単独結論ボタンを出す。設計書§5.5。 */
+function waitForPartner() {
+  const timer = setTimeout(() => {
+    renderCommands(el.commandList, [
+      { text: '▶ひとりで結論を出す', soloFinale: true },
+    ], pick);
+  }, PARTNER_WAIT_MS);
+  return () => clearTimeout(timer);
+}
+
+function cancelPartnerWait() {
+  partnerWaitCancel?.();
+  partnerWaitCancel = null;
 }
 
 function pick(cmd) {
@@ -111,6 +148,10 @@ function pick(cmd) {
   if (cmd.switchTo) {
     route = cmd.switchTo;
     return draw();
+  }
+  if (cmd.soloFinale) {
+    cancelPartnerWait();
+    return enterFinale();
   }
 
   const before = new Set(Object.keys(state.flags));
@@ -137,6 +178,10 @@ function pick(cmd) {
 
   if (bothChapterEnded()) enterFinale();
   else draw();
+
+  // 2人プレイ: 自分の手番の結果を部屋に反映する。断線していてもローカルの
+  // 進行を止めてはならない（失敗は握りつぶし、ローカルで続行）。
+  if (conn && roomCode) pushState(conn, roomCode, state).catch(() => {});
 }
 
 /** chapter はシーンから導出する。createState の初期値以降、ここだけが更新する。 */
@@ -163,8 +208,100 @@ function enterFinale() {
   draw();
 }
 
-// ---- ロビー（1人プレイ: バディを2頭とも選ぶ） ----
+// ---- 2人プレイ: 部屋の購読 ----
+
+/**
+ * ゲーム開始後の部屋購読。相手のフラグ・推理・章末到達を取り込む。
+ * 自分のルートの sceneId は絶対に上書きしない（自分の操作が巻き戻るため。
+ * Task12 が1人プレイのデュアルルート状態で気にしたのと同種の懸念）。
+ */
+function startWatching() {
+  watchRoom(conn, roomCode, (remote) => {
+    const beforeFlags = new Set(Object.keys(state.flags));
+    const beforeDeductions = state.deductions.length;
+    const mine = state.sceneId[myRoute];   // 自分のシーンは相手に上書きさせない
+
+    state = mergeRemote(state, remote);
+    state.sceneId[myRoute] = mine;
+    syncChapters();
+    saveState(state, localStorage);
+
+    for (const f of Object.keys(state.flags)) {
+      if (!beforeFlags.has(f) && scenario.feedText[f]) {
+        appendFeed(el.feed, scenario.feedText[f]);
+        sound.jingle();
+      }
+    }
+
+    if (bothChapterEnded()) return enterFinale();
+    // 相手の推理が届いた時だけコマンドを引き直す。自分のシーンは動いていないので draw() はしない
+    if (state.deductions.length !== beforeDeductions) drawCommands();
+  });
+}
+
+/** ホストが部屋作成後、ゲストのバディ確定を待つ。確定したら supportDog を確定してゲーム開始。 */
+function watchForPartnerBuddy() {
+  const otherRoute = myRoute === 'junko' ? 'taichi' : 'junko';
+  const unsub = watchRoom(conn, roomCode, (remote) => {
+    const otherBuddy = remote.players?.[otherRoute]?.buddy;
+    if (!otherBuddy) return; // まだゲストがバディを選んでいない
+    unsub();
+    state.buddies[otherRoute] = otherBuddy;
+    state.supportDog = DOGS.find((d) => d !== state.buddies.junko && d !== state.buddies.taichi);
+    state = mergeRemote(state, remote);
+    beginTwoPlayerGame();
+  });
+}
+
+function beginTwoPlayerGame() {
+  route = myRoute;
+  syncChapters();
+  saveState(state, localStorage);
+  el.lobby.hidden = true;
+  el.game.hidden = false;
+  startWatching();
+  draw();
+}
+
+// ---- ロビー ----
+
+function showLobbyMessage(text) {
+  const p = document.createElement('p');
+  p.textContent = text;
+  el.lobbyBody.append(p);
+  return p;
+}
+
+function mkButton(label, onClick) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = label;
+  b.addEventListener('click', onClick);
+  return b;
+}
+
+function showLobbyError(message, retryFn) {
+  el.lobbyBody.innerHTML = '';
+  showLobbyMessage(message);
+  el.lobbyBody.append(mkButton('もう一度', retryFn), mkButton('戻る', showLobby));
+}
+
+/** ロビーのトップ。Firebase が使えない（initFirebase が null を返した）場合は
+ *  Task14 の設計どおり黙って1人プレイに直行し、3択は出さない。 */
 function showLobby() {
+  el.lobbyBody.innerHTML = '';
+  if (!conn) return showSoloLobby();
+
+  showLobbyMessage('遊び方を選んでください。');
+  el.lobbyBody.append(
+    mkButton('ひとりで遊ぶ', showSoloLobby),
+    mkButton('部屋を作る', showCreateRoom),
+    mkButton('部屋に入る', showJoinRoom),
+  );
+}
+
+// ---- ロビー（1人プレイ: バディを2頭とも選ぶ） ----
+function showSoloLobby() {
   el.lobbyBody.innerHTML = '';
   const picks = {};
 
@@ -197,7 +334,116 @@ function start(buddies) {
   draw();
 }
 
+// ---- ロビー（2人プレイ: 部屋を作る。ホスト＝じゅんこ視点に固定） ----
+function showCreateRoom() {
+  el.lobbyBody.innerHTML = '';
+  showLobbyMessage(`あなた（${ROUTE_LABEL.junko}）のバディを選んでください。`);
+  for (const dog of DOGS) {
+    el.lobbyBody.append(mkButton(DOG_LABEL[dog], () => createRoomWithBuddy(dog)));
+  }
+}
+
+async function createRoomWithBuddy(hostDog) {
+  const code = generateCode();
+  // ゲストのバディはまだ未確定。createState は junko !== taichi(null) で通り、
+  // supportDog は仮値になるが、watchForPartnerBuddy がゲスト確定後に必ず上書きする。
+  const initial = createState({ buddies: { junko: hostDog, taichi: null }, start: scenario.start });
+
+  try {
+    await createRoom(conn, code, initial);
+  } catch {
+    return showLobbyError('部屋を作れませんでした。もう一度お試しください。', showLobby);
+  }
+
+  roomCode = code;
+  myRoute = 'junko';
+  state = initial;
+
+  el.lobbyBody.innerHTML = '';
+  showLobbyMessage(`ルームコード: ${code}`);
+  showLobbyMessage('相手の参加を待っています…');
+
+  watchForPartnerBuddy();
+}
+
+// ---- ロビー（2人プレイ: 部屋に入る。ゲスト＝たいち視点に固定） ----
+function showJoinRoom() {
+  el.lobbyBody.innerHTML = '';
+  showLobbyMessage('ルームコード（4桁）を入力してください。');
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.inputMode = 'numeric';
+  input.maxLength = 4;
+  input.pattern = '[0-9]{4}';
+  el.lobbyBody.append(input, mkButton('入る', () => attemptJoinRoom(input.value.trim())));
+}
+
+async function attemptJoinRoom(code) {
+  if (!/^\d{4}$/.test(code)) {
+    return showLobbyError('4桁の数字で入力してください。', showJoinRoom);
+  }
+  let room;
+  try {
+    room = await joinRoom(conn, code);
+  } catch (err) {
+    return showLobbyError(err.message, showJoinRoom);
+  }
+  roomCode = code;
+  showJoinBuddyPicker(room);
+}
+
+function showJoinBuddyPicker(room, notice) {
+  el.lobbyBody.innerHTML = '';
+  if (notice) showLobbyMessage(notice);
+  showLobbyMessage(`あなた（${ROUTE_LABEL.taichi}）のバディを選んでください。`);
+
+  const taken = new Set([room.players?.junko?.buddy, room.players?.taichi?.buddy].filter(Boolean));
+  const available = DOGS.filter((d) => !taken.has(d));
+  if (available.length === 0) {
+    return showLobbyError('この部屋のバディは決まっています。部屋の主にもう一度作ってもらってください。', showLobby);
+  }
+  for (const dog of available) {
+    el.lobbyBody.append(mkButton(DOG_LABEL[dog], () => claimAndJoin(dog, room)));
+  }
+}
+
+async function claimAndJoin(dog, room) {
+  let ok;
+  try {
+    ok = await claimBuddy(conn, roomCode, 'taichi', dog);
+  } catch {
+    return showLobbyError('通信に失敗しました。もう一度お試しください。', () => showJoinBuddyPicker(room));
+  }
+
+  if (!ok) {
+    // claimBuddy が false を返した = 自分の枠(taichi)への書き込みが確定しなかった
+    // （多重クリック等）。false を成功扱いにせず、最新のスナップショットで選び直させる。
+    let fresh = room;
+    try {
+      fresh = await joinRoom(conn, roomCode);
+    } catch {
+      // 取り直せなければ古いスナップショットのままでも案内は続ける
+    }
+    return showJoinBuddyPicker(fresh, 'その子は相手が連れて行きました。');
+  }
+
+  const hostDog = room.players?.junko?.buddy ?? null;
+  let skeleton;
+  try {
+    skeleton = createState({ buddies: { junko: hostDog, taichi: dog }, start: scenario.start });
+  } catch {
+    // 極めて稀な同時取得の食い違い（ホストのバディが未確定/重複）。作り直させる。
+    return showLobbyError('バディの選択が重なりました。もう一度お試しください。', showJoinRoom);
+  }
+
+  myRoute = 'taichi';
+  state = mergeRemote(skeleton, room);
+  beginTwoPlayerGame();
+}
+
 // ---- 起動 ----
+conn = await initFirebase();
+
 const saved = loadState(localStorage);
 if (saved) {
   state = saved;
