@@ -6,6 +6,11 @@ import { createSound } from './ui/sound.js';
 import { initFirebase } from './net/firebase.js';
 import { createRoom, joinRoom, watchRoom, claimBuddy, pushState, mergeRemote, generateCode } from './net/room.js';
 
+// ---- PWA: Service Worker 登録（失敗しても遊べる） ----
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {/* 失敗しても遊べる */});
+}
+
 const DOG_LABEL = { raizo: '雷蔵', hana: 'はな', kuranosuke: '蔵之介' };
 const ROUTE_LABEL = { junko: 'じゅんこ', taichi: 'たいち', common: '一同' };
 const PARTNER_WAIT_MS = 45000;
