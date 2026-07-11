@@ -2,6 +2,7 @@ import { loadScenario } from './scenario.js';
 import { createState, saveState, loadState, clearState, DOGS } from './state.js';
 import { visibleCommands, applyCommand, resolveEnding, endingSceneId } from './engine.js';
 import { renderStatus, renderArt, renderDialogue, renderCommands, appendFeed } from './ui/screen.js';
+import { createSound } from './ui/sound.js';
 
 const DOG_LABEL = { raizo: '雷蔵', hana: 'はな', kuranosuke: '蔵之介' };
 const ROUTE_LABEL = { junko: 'じゅんこ', taichi: 'たいち', common: '一同' };
@@ -22,6 +23,7 @@ const scenario = loadScenario(await fetch('data/scenario.json').then((r) => r.js
 let state = null;
 let route = 'junko';      // 1人プレイで現在操作している視点
 let typing = null;
+const sound = createSound();
 
 function currentScene() {
   return scenario.scenes.get(state.sceneId[route]);
@@ -47,7 +49,7 @@ function draw() {
   if (hint) lines.push({ speaker: hint.speaker, text: hint.text });
 
   renderCommands(el.commandList, [], () => {});
-  typing = renderDialogue(el.dialogue, lines, { onDone: drawCommands });
+  typing = renderDialogue(el.dialogue, lines, { onDone: drawCommands, onChar: () => sound.blip() });
 }
 
 function drawCommands() {
@@ -127,7 +129,10 @@ function pick(cmd) {
   saveState(state, localStorage);
 
   for (const f of Object.keys(state.flags)) {
-    if (!before.has(f) && scenario.feedText[f]) appendFeed(el.feed, scenario.feedText[f]);
+    if (!before.has(f) && scenario.feedText[f]) {
+      appendFeed(el.feed, scenario.feedText[f]);
+      sound.jingle();
+    }
   }
 
   if (bothChapterEnded()) enterFinale();
@@ -224,3 +229,11 @@ document.getElementById('phosphor-toggle').addEventListener('click', () => {
   localStorage.setItem('shiba_detective_phosphor', document.body.dataset.phosphor);
 });
 document.body.dataset.phosphor = localStorage.getItem('shiba_detective_phosphor') ?? 'green';
+
+// ---- 効果音トグル ----
+const soundBtn = document.getElementById('sound-toggle');
+soundBtn.addEventListener('click', () => {
+  const on = sound.toggle();
+  soundBtn.textContent = on ? 'SOUND ON' : 'SOUND OFF';
+  soundBtn.setAttribute('aria-pressed', String(on));
+});

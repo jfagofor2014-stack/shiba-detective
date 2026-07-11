@@ -12,7 +12,7 @@ export function renderArt(el, artId) {
 }
 
 /** lines: [{ speaker, text }]。speaker が無い行は地の文として dim 表示する。 */
-export function renderDialogue(el, lines, { onDone } = {}) {
+export function renderDialogue(el, lines, { onDone, onChar } = {}) {
   el.innerHTML = '';
   let active = null;
   let i = 0;
@@ -33,7 +33,10 @@ export function renderDialogue(el, lines, { onDone } = {}) {
     if (speaker) body.className = 'line-end';
     p.append(body);
     el.append(p);
-    active = typewriter(text, { onChar: (c) => { body.textContent += c; }, onDone: next });
+    active = typewriter(text, {
+      onChar: (c) => { body.textContent += c; onChar?.(); },
+      onDone: next,
+    });
   };
 
   next();
