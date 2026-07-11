@@ -66,7 +66,13 @@ function drawCommands() {
 
   if (scene.chapterEnd) {
     const cmds = [];
-    if (scene.nextChapter) {
+    // 第1→2章・第2→3章の章送りは各ルート独立に進めてよい。
+    // だが ch3→ch4 は共有(common)のフィナーレへの合流であり、片方のルートだけが
+    // 先に入ってはならない。合流は pick() 内の bothChapterEnded() が両ルートの
+    // 第3章末到達を検知して enterFinale() を自動発火させることで行う。
+    // よって nextChapter が共有フィナーレを指す場合は「▶次の章へ」を出さず、
+    // 視点切替だけを出して、もう片方のルートを終わらせに行かせる。
+    if (scene.nextChapter && scene.nextChapter !== 'ch4_finale_intro') {
       cmds.push({ text: '▶次の章へ', next: scene.nextChapter, route });
     }
     cmds.push(...switchRouteCommand());
