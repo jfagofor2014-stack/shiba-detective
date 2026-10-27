@@ -4,6 +4,9 @@ const CDN = 'https://www.gstatic.com/firebasejs/10.12.2';
 
 /** 失敗しても例外を投げず null を返す。呼び出し側は1人プレイにフォールバックする。 */
 export async function initFirebase() {
+  // 設定がまだプレースホルダーのまま（Firebase プロジェクト未作成）なら SDK を取りに行かない。
+  // スマホが起動のたびに数百KBを読み込んでから失敗するのを避ける。
+  if (firebaseConfig.apiKey.startsWith('<')) return null;
   try {
     const [{ initializeApp }, { getAuth, signInAnonymously }, dbMod] = await Promise.all([
       import(`${CDN}/firebase-app.js`),

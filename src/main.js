@@ -63,7 +63,14 @@ function draw() {
   if (hint) lines.push({ speaker: hint.speaker, text: hint.text });
 
   renderCommands(el.commandList, [], () => {});
-  typing = renderDialogue(el.dialogue, lines, { onDone: drawCommands, onChar: () => sound.blip() });
+  typing = renderDialogue(el.dialogue, lines, {
+    onDone: drawCommands,
+    onChar: () => {
+      sound.blip();
+      // スマホではセリフ欄が内側でスクロールするので、流れている行を常に見せる
+      el.dialogue.scrollTop = el.dialogue.scrollHeight;
+    },
+  });
 }
 
 function drawCommands() {
@@ -486,6 +493,8 @@ document.addEventListener('keydown', (e) => {
     el.commandList.querySelectorAll('button')[n - 1]?.click();
   }
 });
+// スマホには Space キーが無いので、セリフ欄のタップでも文字送りを早送りする
+el.dialogue.addEventListener('click', () => typing?.skip());
 
 // ---- 蛍光色の切替 ----
 const PHOSPHORS = ['green', 'amber', 'white'];
