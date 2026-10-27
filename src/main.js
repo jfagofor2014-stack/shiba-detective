@@ -2,6 +2,7 @@ import { loadScenario } from './scenario.js';
 import { createState, saveState, loadState, clearState, DOGS } from './state.js';
 import { visibleCommands, applyCommand, resolveEnding, endingSceneId } from './engine.js';
 import { renderStatus, renderArt, renderDialogue, renderCommands, appendFeed } from './ui/screen.js';
+import { titleArt, detectiveShiba, dogPortrait } from './ui/art.js';
 import { createSound } from './ui/sound.js';
 import { initFirebase } from './net/firebase.js';
 import { createRoom, joinRoom, watchRoom, claimBuddy, pushState, mergeRemote, generateCode } from './net/room.js';
@@ -12,6 +13,7 @@ if ('serviceWorker' in navigator) {
 }
 
 const DOG_LABEL = { raizo: '雷蔵', hana: 'はな', kuranosuke: '蔵之介' };
+const DOG_TRAIT = { raizo: 'クンクン／鼻がきく', hana: 'ジロリ／嘘を見抜く', kuranosuke: 'へそ天／たまに狂犬' };
 const ROUTE_LABEL = { junko: 'じゅんこ', taichi: 'たいち', common: '一同' };
 const PARTNER_WAIT_MS = 45000;
 
@@ -54,7 +56,7 @@ function draw() {
     buddyLabel: scene.route === 'common' ? ROUTE_LABEL.common : DOG_LABEL[state.buddies[scene.route]],
     routeLabel: ROUTE_LABEL[scene.route],
   });
-  renderArt(el.art, scene.art);
+  renderArt(el.art, scene.art, { route: scene.route, buddies: state.buddies });
 
   const lines = [];
   if (scene.description) lines.push({ text: scene.description });
@@ -305,6 +307,28 @@ function mkButton(label, onClick) {
   return b;
 }
 
+/** バディ選びのカード（犬の絵＋名前＋得意技） */
+function dogButton(dog, onClick) {
+  const b = mkButton('', onClick);
+  b.className = 'dog-card';
+  b.innerHTML = dogPortrait(dog);
+  const name = document.createElement('span');
+  name.textContent = DOG_LABEL[dog];
+  const trait = document.createElement('small');
+  trait.textContent = DOG_TRAIT[dog];
+  b.append(name, trait);
+  return b;
+}
+
+/** パネルの下に「もどる」を置く */
+function appendBack(onClick = showTitleMenu) {
+  const p = document.createElement('p');
+  const b = mkButton('もどる', onClick);
+  b.classList.add('ghost');
+  p.append(b);
+  el.lobbyBody.append(p);
+}
+
 function showLobbyError(message, retryFn) {
   el.lobbyBody.innerHTML = '';
   showLobbyMessage(message);
@@ -323,6 +347,7 @@ function showLobby() {
     mkButton('部屋を作る', showCreateRoom),
     mkButton('部屋に入る', showJoinRoom),
   );
+  appendBack();
 }
 
 // ---- ロビー（1人プレイ: バディを2頭とも選ぶ） ----
@@ -336,17 +361,14 @@ function showSoloLobby() {
     el.lobbyBody.append(h);
     for (const dog of DOGS) {
       if (Object.values(picks).includes(dog)) continue;
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = DOG_LABEL[dog];
-      b.addEventListener('click', () => {
+      el.lobbyBody.append(dogButton(dog, () => {
         picks[r] = dog;
         el.lobbyBody.innerHTML = '';
         if (r === 'junko') askFor('taichi');
         else start(picks);
-      });
-      el.lobbyBody.append(b);
+      }));
     }
+    appendBack();
   };
   askFor('junko');
 }
@@ -364,8 +386,9 @@ function showCreateRoom() {
   el.lobbyBody.innerHTML = '';
   showLobbyMessage(`あなた（${ROUTE_LABEL.junko}）のバディを選んでください。`);
   for (const dog of DOGS) {
-    el.lobbyBody.append(mkButton(DOG_LABEL[dog], () => createRoomWithBuddy(dog)));
+    el.lobbyBody.append(dogButton(dog, () => createRoomWithBuddy(dog)));
   }
+  appendBack(showLobby);
 }
 
 async function createRoomWithBuddy(hostDog) {
@@ -428,7 +451,7 @@ function showJoinBuddyPicker(room, notice) {
     return showLobbyError('この部屋のバディは決まっています。部屋の主にもう一度作ってもらってください。', showLobby);
   }
   for (const dog of available) {
-    el.lobbyBody.append(mkButton(DOG_LABEL[dog], () => claimAndJoin(dog, room)));
+    el.lobbyBody.append(dogButton(dog, () => claimAndJoin(dog, room)));
   }
 }
 
@@ -469,20 +492,70 @@ async function claimAndJoin(dog, room) {
 // ---- 起動 ----
 conn = await initFirebase();
 
-const saved = loadState(localStorage);
-if (saved) {
+// ---- タイトル画面 ----
+const menu = {
+  newGame: document.getElementById('menu-new'),
+  continue: document.getElementById('menu-continue'),
+  options: document.getElementById('menu-options'),
+};
+
+function showTitleMenu() {
+  el.lobbyBody.innerHTML = '';
+  el.lobbyBody.hidden = true;
+  el.lobby.classList.remove('choosing');
+  menu.continue.disabled = !loadState(localStorage);
+  menu.newGame.focus({ preventScroll: true });
+}
+
+function openPanel(fill) {
+  el.lobby.classList.add('choosing');
+  el.lobbyBody.hidden = false;
+  fill();
+}
+
+function showOptions() {
+  el.lobbyBody.innerHTML = '';
+  showLobbyMessage('おぷしょん');
+  const soundBtn = mkButton('', () => {
+    sound.toggle();
+    label();
+  });
+  const label = () => { soundBtn.textContent = `サウンド：${sound.enabled ? 'ON' : 'OFF'}`; soundBtn.setAttribute('aria-pressed', String(sound.enabled)); };
+  label();
+  el.lobbyBody.append(soundBtn);
+  appendBack();
+}
+
+menu.newGame.addEventListener('click', () => openPanel(showLobby));
+menu.options.addEventListener('click', () => openPanel(showOptions));
+menu.continue.addEventListener('click', () => {
   // 再開時は保存されたゲーム状態のみを復元する。2人プレイのルーム接続(conn/myRoute/roomCode)は
-  // 永続化していないため、リロード後は常に1人プレイの両視点切替として再開する(既知の制約)。
+  // 永続化していないため、常に1人プレイの両視点切替として再開する(既知の制約)。
+  const saved = loadState(localStorage);
+  if (!saved) return showTitleMenu();
   state = saved;
   el.lobby.hidden = true;
   el.game.hidden = false;
   draw();
-} else {
-  showLobby();
-}
+});
+
+// ゲーム中の ≡ でタイトルへ（進行は自動保存されているので「つづきから」で戻れる）
+document.getElementById('to-title').addEventListener('click', () => {
+  typing?.skip();
+  cancelPartnerWait();
+  el.game.hidden = true;
+  el.lobby.hidden = false;
+  showTitleMenu();
+});
+
+document.getElementById('title-art').innerHTML = titleArt();
+document.getElementById('title-icon').innerHTML = detectiveShiba();
+document.getElementById('title-art').firstElementChild.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+showTitleMenu();
 
 // ---- キーボード ----
 document.addEventListener('keydown', (e) => {
+  if (el.game.hidden) return;
   if (e.key === ' ' || e.key === 'Enter') {
     e.preventDefault();
     typing?.skip();
@@ -495,20 +568,3 @@ document.addEventListener('keydown', (e) => {
 });
 // スマホには Space キーが無いので、セリフ欄のタップでも文字送りを早送りする
 el.dialogue.addEventListener('click', () => typing?.skip());
-
-// ---- 蛍光色の切替 ----
-const PHOSPHORS = ['green', 'amber', 'white'];
-document.getElementById('phosphor-toggle').addEventListener('click', () => {
-  const i = PHOSPHORS.indexOf(document.body.dataset.phosphor);
-  document.body.dataset.phosphor = PHOSPHORS[(i + 1) % PHOSPHORS.length];
-  localStorage.setItem('shiba_detective_phosphor', document.body.dataset.phosphor);
-});
-document.body.dataset.phosphor = localStorage.getItem('shiba_detective_phosphor') ?? 'green';
-
-// ---- 効果音トグル ----
-const soundBtn = document.getElementById('sound-toggle');
-soundBtn.addEventListener('click', () => {
-  const on = sound.toggle();
-  soundBtn.textContent = on ? 'SOUND ON' : 'SOUND OFF';
-  soundBtn.setAttribute('aria-pressed', String(on));
-});

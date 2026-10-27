@@ -10,33 +10,51 @@
 <meta name="apple-mobile-web-app-title" content="柴犬探偵団">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
-<body data-phosphor="green">
-  <div id="scanlines" aria-hidden="true"></div>
+<body>
+  <div id="frame">
+    <div id="screen">
 
-  <main id="game" hidden>
-    <header id="status">
-      <span id="status-location"></span>
-      <span id="status-buddy"></span>
-      <span id="status-route"></span>
-    </header>
-    <section id="art" aria-label="場面"></section>
-    <section id="dialogue" aria-live="polite"></section>
-    <footer id="commands">
-      <p class="label">【コマンド】</p>
-      <ol id="command-list"></ol>
-    </footer>
-    <aside id="feed" aria-live="polite" aria-label="相棒からの報せ"></aside>
-  </main>
+      <section id="lobby" aria-label="タイトル">
+        <div id="title-art"></div>
+        <div class="title-logo">
+          <h1><span class="logo" data-text="柴犬探偵団">柴犬探偵団</span><span id="title-icon" aria-hidden="true"></span></h1>
+          <p class="subtitle">〜リビングに消ゆ〜</p>
+        </div>
+        <nav id="title-menu" aria-label="メニュー">
+          <button type="button" id="menu-new" aria-label="はじめから">[はじめから]</button>
+          <button type="button" id="menu-continue" aria-label="つづきから">[つづきから]</button>
+          <button type="button" id="menu-options" aria-label="おぷしょん">[おぷしょん]</button>
+        </nav>
+        <div id="lobby-body" class="panel" aria-live="polite" hidden></div>
+        <p class="press-start" aria-hidden="true">PRESS START BUTTON</p>
+        <p class="copyright">© 2026 SHIBA INU DETECTIVE OFFICE</p>
+      </section>
 
-  <section id="lobby">
-    <h1>柴犬探偵団<small>〜リビングに消ゆ〜</small></h1>
-    <div id="lobby-body" aria-live="polite"></div>
-  </section>
+      <main id="game" hidden>
+        <header id="status">
+          <span id="status-location"></span>
+          <span id="status-buddy"></span>
+          <span id="status-route"></span>
+          <button type="button" id="to-title" aria-label="タイトルへもどる">≡</button>
+        </header>
+        <div id="stage">
+          <section id="art" aria-label="場面"></section>
+          <section id="dialogue" aria-live="polite"></section>
+        </div>
+        <footer id="commands">
+          <p class="label">【コマンド】</p>
+          <ol id="command-list"></ol>
+        </footer>
+        <aside id="feed" aria-live="polite" aria-label="相棒からの報せ"></aside>
+      </main>
 
-  <button id="phosphor-toggle" type="button">COLOR</button>
-  <button id="sound-toggle" type="button" aria-pressed="false">SOUND OFF</button>
+    </div>
+  </div>
 
   <script type="module" src="src/main.js"></script>
 </body>

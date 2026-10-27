@@ -1,17 +1,30 @@
 import { art } from './art.js';
 import { typewriter } from './typewriter.js';
 
+/** [ラベル：値] を作る。値は <b> で色を変える */
+function bracket(el, label, value, emphasize) {
+  el.replaceChildren(`[${label}：`);
+  if (emphasize) {
+    const b = document.createElement('b');
+    b.textContent = value;
+    el.append(b, ']');
+  } else {
+    el.append(`${value}]`);
+  }
+}
+
 export function renderStatus(el, { locationName, buddyLabel, routeLabel }) {
-  el.querySelector('#status-location').textContent = `[場所: ${locationName}]`;
-  el.querySelector('#status-buddy').textContent = `[バディ: ${buddyLabel}]`;
-  el.querySelector('#status-route').textContent = `[視点: ${routeLabel}]`;
+  bracket(el.querySelector('#status-location'), '場所', locationName, false);
+  bracket(el.querySelector('#status-buddy'), 'バディ', buddyLabel, true);
+  bracket(el.querySelector('#status-route'), '視点', routeLabel, false);
 }
 
-export function renderArt(el, artId) {
-  el.innerHTML = art(artId);
+/** ctx はその場面に誰を立たせるか（art.js の art() を参照） */
+export function renderArt(el, artId, ctx) {
+  el.innerHTML = art(artId, ctx);
 }
 
-/** lines: [{ speaker, text }]。speaker が無い行は地の文として dim 表示する。 */
+/** lines: [{ speaker, text }]。speaker が無い行は地の文として dim 表示する。『』で囲んだ語は強調色にする。 */
 export function renderDialogue(el, lines, { onDone, onChar } = {}) {
   el.innerHTML = '';
   let active = null;
@@ -33,8 +46,17 @@ export function renderDialogue(el, lines, { onDone, onChar } = {}) {
     if (speaker) body.className = 'line-end';
     p.append(body);
     el.append(p);
+    let target = body;   // 『』の中では <em> に書き込む
     active = typewriter(text, {
-      onChar: (c) => { body.textContent += c; onChar?.(); },
+      onChar: (c) => {
+        if (c === '『') {
+          target = document.createElement('em');
+          body.append(target);
+        }
+        target.append(c);
+        if (c === '』') target = body;
+        onChar?.();
+      },
       onDone: next,
     });
   };

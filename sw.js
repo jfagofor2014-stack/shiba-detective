@@ -1,10 +1,10 @@
-const CACHE = 'shiba-detective-v2';
+const CACHE = 'shiba-detective-v3';
 // main.js は src/net/*.js を静的 import しているので、オフラインで起動するにはこれらも要る
 const ASSETS = [
   './', './index.html', './style.css', './manifest.json', './icon.svg', './icon-180.png', './icon-512.png',
   './data/scenario.json',
   './src/main.js', './src/engine.js', './src/state.js', './src/scenario.js',
-  './src/ui/screen.js', './src/ui/art.js', './src/ui/typewriter.js', './src/ui/sound.js',
+  './src/ui/screen.js', './src/ui/art.js', './src/ui/pixel.js', './src/ui/sprites.js', './src/ui/typewriter.js', './src/ui/sound.js',
   './src/net/firebase.js', './src/net/firebase-config.js', './src/net/room.js',
 ];
 

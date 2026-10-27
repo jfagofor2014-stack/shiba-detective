@@ -1,81 +1,191 @@
-:root { --bg: #000; --phosphor: #33ff66; --dim: color-mix(in srgb, var(--phosphor) 45%, #000); }
-body[data-phosphor="amber"] { --phosphor: #ffb000; }
-body[data-phosphor="white"] { --phosphor: #e8e8e8; }
-
+:root {
+  --ink: #05070d;
+  --navy: #0d1424;
+  --gold: #c9a063; --gold-dk: #6b4b22;
+  --text: #f4efe2; --dim: #a9b4cc;
+  --green: #9fe6a2; --orange: #f4a640; --yellow: #f6e27a;
+  --font: 'DotGothic16', 'Hiragino Kaku Gothic ProN', 'MS Gothic', monospace;
+  --frame: clamp(8px, 2.2vw, 26px);
+  /* 文字のふち取り（ドット絵の上でも読めるように） */
+  --edge: 1px 0 #000, -1px 0 #000, 0 1px #000, 0 -1px #000, 1px 1px #000, -1px 1px #000;
+  --edge-thick: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000, 2px 2px #000, -2px -2px #000, 2px -2px #000, -2px 2px #000, 3px 4px #000;
+}
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
-  margin: 0; background: var(--bg); color: var(--phosphor);
-  font-family: "MS Gothic", "Osaka-Mono", "Courier New", monospace;
-  font-size: clamp(15px, 2.4vw, 16px); line-height: 1.7;
-  min-height: 100dvh;
+  margin: 0; color: var(--text); font-family: var(--font); line-height: 1.6;
+  font-size: clamp(15px, 1.5vw, 19px);
+  /* 肉球柄の額縁 */
+  background: #000 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' shape-rendering='crispEdges' fill='%23864f22'%3E%3Cpath d='M2 4h2v2H2zM4 2h2v2H4zM7 2h2v2H7zM9 4h2v2H9zM4 6h5v3H4zM5 9h3v1H5zM14 15h2v2h-2zM16 13h2v2h-2zM19 13h2v2h-2zM21 15h2v2h-2zM16 17h5v3h-5zM17 20h3v1h-3z'/%3E%3C/svg%3E") 0 0 / 46px 46px;
 }
-button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-#scanlines {
-  position: fixed; inset: 0; pointer-events: none; z-index: 10;
-  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,.28) 2px 4px);
+button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+#frame {
+  height: 100dvh; display: grid; place-items: center;
+  padding: calc(var(--frame) + env(safe-area-inset-top)) calc(var(--frame) + env(safe-area-inset-right))
+           calc(var(--frame) + env(safe-area-inset-bottom)) calc(var(--frame) + env(safe-area-inset-left));
 }
-#game {
-  display: grid; grid-template-rows: auto 1fr auto auto; gap: 0; max-width: 760px; margin: 0 auto; min-height: 100dvh;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
-#game[hidden] { display: none; }
-#status, #dialogue, #commands, #art { border: 1px solid var(--phosphor); margin: -1px 0 0; padding: .6em .9em; }
-#status { display: flex; flex-wrap: wrap; gap: 1.2em; font-size: .85em; }
-#art { display: grid; place-items: center; padding: 1em; }
-#art svg { width: min(100%, 420px); height: auto; color: var(--phosphor); }
-/* セリフ欄はタップで文字送りを早送りする（スマホには Space キーが無い） */
-#dialogue { min-height: 7.5em; cursor: pointer; -webkit-user-select: none; user-select: none; }
-#dialogue p { margin: 0 0 .3em; }
-#dialogue .speaker::after { content: "「"; }
-#dialogue .line-end::after { content: "」"; }
-#dialogue .narration { color: var(--dim); }
-#commands .label { margin: 0 0 .3em; }
-#command-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4em .9em; }
-#command-list button, #lobby-body button {
-  background: none; border: 1px solid var(--phosphor); color: inherit;
-  font: inherit; padding: .25em .7em; cursor: pointer;
-}
-#command-list button:focus-visible, #lobby-body button:focus-visible,
-#command-list button:active, #lobby-body button:active { background: var(--phosphor); color: var(--bg); outline: none; }
-@media (hover: hover) {
-  #command-list button:hover, #lobby-body button:hover { background: var(--phosphor); color: var(--bg); }
-}
-#feed { font-size: .8em; color: var(--dim); padding: .4em .9em; min-height: 2.4em; }
-#feed p { margin: 0; }
-#phosphor-toggle, #sound-toggle {
-  position: fixed; bottom: calc(.6em + env(safe-area-inset-bottom)); z-index: 20; background: var(--bg); color: var(--phosphor);
-  border: 1px solid var(--phosphor); font: inherit; font-size: .72em; padding: .2em .6em; cursor: pointer;
-}
-#phosphor-toggle { right: .6em; } #sound-toggle { right: 6.4em; }
-#lobby {
-  max-width: 620px; margin: 0 auto;
-  padding: calc(2em + env(safe-area-inset-top)) calc(1em + env(safe-area-inset-right)) 2em calc(1em + env(safe-area-inset-left));
-}
-#lobby h1 { font-weight: normal; letter-spacing: .1em; }
-#lobby h1 small { display: block; font-size: .55em; color: var(--dim); }
-#lobby-body { display: flex; flex-wrap: wrap; align-items: center; gap: .6em; }
-#lobby-body p { flex-basis: 100%; margin: .4em 0; }
-#lobby-body button { min-height: 44px; padding: .3em 1.2em; }
-#lobby-body input {
-  min-height: 44px; width: 7em; padding: .3em .6em; letter-spacing: .3em;
-  background: var(--bg); color: inherit; border: 1px solid var(--phosphor);
-  font: inherit; font-size: max(16px, 1em); /* 16px 未満だと iOS がフォーカス時に拡大する */
+#screen {
+  width: min(100%, 1100px); height: 100%; max-height: 900px; overflow: hidden;
+  display: grid; grid-template-rows: minmax(0, 1fr);
+  background: var(--navy);
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 0 2px #000, 0 0 0 4px var(--gold-dk), inset 0 0 0 2px #000, inset 0 0 0 3px var(--gold-dk);
 }
 
-/* スマホ縦持ち: 1画面に収め、絵は小さく、セリフ欄だけ内側でスクロールさせる */
-@media (max-width: 640px) {
-  #game { height: 100dvh; min-height: 0; grid-template-rows: auto auto minmax(0, 1fr) auto auto; }
-  #status { gap: .1em .8em; font-size: .78em; padding: .4em .7em; }
-  #art { padding: .3em; }
-  #art svg { width: auto; max-width: 100%; height: clamp(80px, 20dvh, 190px); aspect-ratio: 160 / 100; }
-  #dialogue { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: .5em .7em; }
-  #commands { padding: .4em .5em .5em; }
-  #commands .label { font-size: .8em; margin: 0 0 .2em; }
-  #command-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4em; }
-  #command-list button { width: 100%; min-height: 44px; text-align: left; line-height: 1.3; padding: .35em .6em; }
-  /* 右下の COLOR / SOUND ボタンに速報の文字が潜らないよう右側を空ける */
-  #feed { padding: .4em 13.5em .4em .7em; min-height: 3.6em; }
-  #phosphor-toggle, #sound-toggle { min-height: 34px; font-size: .75em; padding: .2em .7em; }
+/* ---------- タイトル ---------- */
+#lobby { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; }
+#title-art { position: relative; min-height: 0; background: #000; }
+#title-art svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.title-logo { position: absolute; top: 5%; left: 4%; right: 4%; pointer-events: none; }
+.title-logo h1 { margin: 0; display: flex; align-items: center; gap: .25em; font-weight: normal; }
+.logo {
+  position: relative; display: inline-block; white-space: nowrap;
+  font-size: clamp(42px, 8.6vw, 104px); line-height: 1.1; letter-spacing: .02em;
+  color: #000; -webkit-text-stroke: .17em #000; text-shadow: .06em .08em 0 #000;
 }
-@media (prefers-reduced-motion: reduce) { #scanlines { display: none; } }
+/* 上半分が白・下半分が黄色の文字を、黒いふちの上に重ねる */
+.logo::after {
+  content: attr(data-text); position: absolute; inset: 0;
+  -webkit-text-stroke: 0; text-shadow: none; color: transparent;
+  background: linear-gradient(#fffdf4 54%, var(--yellow) 54%); -webkit-background-clip: text; background-clip: text;
+}
+#title-icon svg {
+  display: block; width: clamp(48px, 9vw, 112px); height: auto;
+  background: #f6e7c8; border: 3px solid #000; border-radius: 50%; padding: 8% 6% 2%;
+}
+.subtitle {
+  margin: .1em 0 0 1.4em; font-size: clamp(20px, 3.6vw, 44px); line-height: 1.2;
+  color: #fffdf4; text-shadow: var(--edge-thick);
+}
+#title-menu {
+  position: absolute; left: 50%; top: 46%; transform: translateX(-50%);
+  display: grid; gap: .1em; justify-items: start;
+}
+#title-menu button {
+  position: relative; background: none; border: 0; padding: .05em .2em;
+  font-size: clamp(20px, 3vw, 36px); line-height: 1.35; text-shadow: var(--edge-thick);
+}
+#title-menu button::before { content: '▶'; position: absolute; right: 100%; color: var(--green); visibility: hidden; }
+#title-menu button:focus-visible, #title-menu button:active { outline: none; color: var(--green); }
+#title-menu button:focus-visible::before, #title-menu button:active::before { visibility: visible; }
+@media (hover: hover) {
+  #title-menu button:not(:disabled):hover { color: var(--green); }
+  #title-menu button:not(:disabled):hover::before { visibility: visible; }
+}
+#title-menu button:disabled { color: #6b7488; cursor: default; }
+.press-start {
+  position: absolute; left: 0; right: 0; bottom: calc(2.4em + 4%); margin: 0; text-align: center; pointer-events: none;
+  font-size: clamp(14px, 2.2vw, 26px); letter-spacing: .14em; text-shadow: var(--edge-thick);
+  animation: blink 1.2s steps(2, jump-none) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+.copyright {
+  margin: 0; padding: .35em; text-align: center; background: #000;
+  font-size: clamp(11px, 1.6vw, 18px); letter-spacing: .12em;
+}
+#lobby.choosing #title-menu, #lobby.choosing .press-start { display: none; }
+
+/* バディ選びなどのパネル */
+.panel {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -46%);
+  width: min(92%, 660px); max-height: 88%; overflow-y: auto;
+  background: rgba(8, 12, 24, .94); border: 2px solid var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold-dk); padding: .9em 1.1em;
+}
+#lobby-body { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .6em; }
+#lobby-body p { flex-basis: 100%; margin: .1em 0; text-align: center; }
+#lobby-body button {
+  min-height: 44px; padding: .3em 1em; background: rgba(255, 255, 255, .04);
+  border: 1px solid var(--gold); color: var(--text);
+}
+#lobby-body button:focus-visible, #lobby-body button:active { outline: none; background: var(--gold); color: #000; }
+@media (hover: hover) { #lobby-body button:hover { background: var(--gold); color: #000; } }
+#lobby-body .dog-card { display: grid; justify-items: center; gap: .1em; width: 8.2em; padding: .5em .3em; }
+#lobby-body .dog-card svg { width: 64px; height: auto; display: block; }
+#lobby-body .dog-card small { color: var(--dim); font-size: .72em; line-height: 1.3; }
+@media (hover: hover) { #lobby-body .dog-card:hover small { color: #000; } }
+#lobby-body .dog-card:active small { color: #000; }
+#lobby-body input {
+  min-height: 44px; width: 7em; padding: .3em .6em; letter-spacing: .3em;
+  background: #000; color: var(--text); border: 1px solid var(--gold);
+  font: inherit; font-size: max(16px, 1em); /* 16px 未満だと iOS がフォーカス時に拡大する */
+}
+#lobby-body .ghost { border-color: var(--gold-dk); color: var(--dim); }
+
+/* ---------- ゲーム画面 ---------- */
+#game { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; min-height: 0; }
+#status {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .1em .7em; padding: .35em .8em;
+  background: #000; border-bottom: 2px solid var(--gold-dk);
+  font-size: clamp(14px, 1.9vw, 24px); line-height: 1.4; text-shadow: var(--edge);
+}
+#status-location { color: var(--green); }
+#status-buddy { color: var(--green); }
+#status-buddy b, #status-route b { font-weight: normal; color: var(--orange); }
+#status-route { color: var(--yellow); }
+#status-route b { color: var(--yellow); }
+#to-title {
+  margin-left: auto; min-width: 36px; min-height: 32px; padding: 0 .4em;
+  background: none; border: 1px solid var(--gold-dk); color: var(--gold);
+}
+#stage { display: contents; }
+#art { background: #000; min-height: 0; }
+#art svg { display: block; width: 100%; height: auto; max-height: 56dvh; margin: 0 auto; }
+#dialogue {
+  min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: .6em 1.1em; border-top: 2px solid var(--gold-dk);
+  background: linear-gradient(#0a0f1c, #070b15);
+  font-size: clamp(15px, 1.75vw, 22px); text-shadow: var(--edge);
+  cursor: pointer; -webkit-user-select: none; user-select: none;
+}
+#dialogue p { margin: 0 0 .25em; }
+#dialogue .speaker { color: var(--orange); }
+#dialogue .speaker::after { content: "「"; color: var(--text); }
+#dialogue .line-end::after { content: "」"; }
+#dialogue .narration { color: var(--dim); }
+#dialogue em { font-style: normal; color: var(--orange); }
+
+#commands {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: .2em .4em;
+  padding: .45em .8em; background: #000; border-top: 2px solid var(--gold-dk);
+  font-size: clamp(14px, 1.75vw, 22px); text-shadow: var(--edge);
+}
+#commands .label { margin: 0; color: var(--yellow); }
+#command-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .1em .3em; }
+#command-list button { background: none; border: 0; padding: .1em .15em; color: var(--text); text-align: left; text-shadow: inherit; }
+#command-list button::before { content: "["; }
+#command-list button::after { content: "]"; }
+#command-list button:focus-visible, #command-list button:active { outline: none; color: var(--green); }
+@media (hover: hover) { #command-list button:hover { color: var(--green); } }
+#feed { padding: .2em .8em .35em; background: #000; color: var(--green); font-size: .78em; min-height: 1.8em; }
+#feed p { margin: 0; }
+
+/* ---------- スマホ縦持ち ---------- */
+@media (max-width: 640px) {
+  /* 絵を全面に敷くと左右の犬が切れるので、ロゴ・絵・メニューを縦に並べる */
+  #lobby { display: flex; flex-direction: column; justify-content: space-evenly; }
+  .title-logo { position: static; order: 1; padding: 0 .6em; }
+  .title-logo h1 { justify-content: center; }
+  .subtitle { margin: .2em 0 0; text-align: center; }
+  #title-art { order: 2; }
+  #title-art svg { position: static; height: auto; }
+  #title-menu { position: static; order: 3; transform: none; justify-self: center; margin: 0 auto; }
+  .press-start { position: static; order: 4; }
+  .copyright { order: 5; }
+  #lobby-body .dog-card { width: 6.6em; }
+  #lobby-body .dog-card svg { width: 54px; }
+  #status { font-size: .8em; gap: 0 .6em; padding: .3em .6em; }
+  #dialogue { padding: .5em .8em; }
+  #commands { display: block; padding: .4em .5em .5em; }
+  #commands .label { font-size: .8em; margin: 0 0 .2em; }
+  #command-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35em; }
+  #command-list button {
+    width: 100%; min-height: 44px; line-height: 1.3; padding: .35em .5em;
+    background: rgba(255, 255, 255, .04); border: 1px solid var(--gold-dk);
+  }
+  /* 枠があるので [ ] は付けない（折り返しも減る） */
+  #command-list button::before, #command-list button::after { content: none; }
+}
+@media (prefers-reduced-motion: reduce) { .press-start { animation: none; } }
