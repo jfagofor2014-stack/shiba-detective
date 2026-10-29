@@ -1,8 +1,8 @@
 import { loadScenario } from './scenario.js';
 import { createState, saveState, loadState, clearState, DOGS } from './state.js';
 import { visibleCommands, applyCommand, resolveEnding, endingSceneId } from './engine.js';
-import { renderStatus, renderArt, renderDialogue, renderCommands, appendFeed } from './ui/screen.js';
-import { titleArt, detectiveShiba, dogPortrait } from './ui/art.js';
+import { renderStatus, renderArt, renderDialogue, renderCommands, appendFeed, showImage } from './ui/screen.js';
+import { titleArt, detectiveShiba, dogPortrait, TITLE_IMAGE } from './ui/art.js';
 import { createSound } from './ui/sound.js';
 import { initFirebase } from './net/firebase.js';
 import { createRoom, joinRoom, watchRoom, claimBuddy, pushState, mergeRemote, generateCode } from './net/room.js';
@@ -548,9 +548,9 @@ document.getElementById('to-title').addEventListener('click', () => {
   showTitleMenu();
 });
 
-document.getElementById('title-art').innerHTML = titleArt();
+showImage(document.getElementById('title-art'), TITLE_IMAGE, '柴犬探偵団のタイトル', () =>
+  titleArt().replace('<svg ', '<svg preserveAspectRatio="xMidYMid slice" '));
 document.getElementById('title-icon').innerHTML = detectiveShiba();
-document.getElementById('title-art').firstElementChild.setAttribute('preserveAspectRatio', 'xMidYMid slice');
 showTitleMenu();
 
 // ---- キーボード ----

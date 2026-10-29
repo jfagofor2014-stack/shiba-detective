@@ -342,6 +342,29 @@ export function art(id, { route, buddies } = {}) {
   return svg(s, LABELS[id]);
 }
 
+// ---- Gemini で描いた場面画像（img/*.webp）。無い時や読めない時は上の SVG で描く ----
+export const TITLE_IMAGE = 'img/title.webp';
+const DOG_IDS = ['raizo', 'hana', 'kuranosuke'];
+
+/** art() と同じ場面の画像のパス。画像が無い組み合わせは null */
+export function artImage(id, { route, buddies } = {}) {
+  if (id in DOGS) return `img/closeup-${id}.webp`;
+  if (!BACKGROUNDS[id]) return null;
+  if (route === 'common') return id === 'living' ? 'img/finale.webp' : null;
+  const dog = route && buddies?.[route];
+  return dog ? `img/${id}-${dog}.webp` : null;
+}
+
+/** 画像の全パス（Service Worker の事前キャッシュと先読み用） */
+export function artImages() {
+  const places = Object.keys(BACKGROUNDS).flatMap((id) => DOG_IDS.map((dog) => `img/${id}-${dog}.webp`));
+  return [TITLE_IMAGE, ...DOG_IDS.map((dog) => `img/closeup-${dog}.webp`), ...places, 'img/finale.webp'];
+}
+
+export function artLabel(id) {
+  return LABELS[id] ?? '場面';
+}
+
 /** バディ選びのカードに載せる犬の絵 */
 export function dogPortrait(id) {
   return `<svg viewBox="0 0 36 33" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${LABELS[id]}">${dogSprite(id, { x: 0, y: 0 })}</svg>`;

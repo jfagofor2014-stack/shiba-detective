@@ -1,3 +1,5 @@
 node_modules/
 .DS_Store
 .superpowers/
+# Gemini から取り出した元の PNG（ゲームは img/*.webp を使う）
+images/

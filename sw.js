@@ -1,4 +1,4 @@
-const CACHE = 'shiba-detective-v3';
+const CACHE = 'shiba-detective-v4';
 // main.js は src/net/*.js を静的 import しているので、オフラインで起動するにはこれらも要る
 const ASSETS = [
   './', './index.html', './style.css', './manifest.json', './icon.svg', './icon-180.png', './icon-512.png',
@@ -6,6 +6,16 @@ const ASSETS = [
   './src/main.js', './src/engine.js', './src/state.js', './src/scenario.js',
   './src/ui/screen.js', './src/ui/art.js', './src/ui/pixel.js', './src/ui/sprites.js', './src/ui/typewriter.js', './src/ui/sound.js',
   './src/net/firebase.js', './src/net/firebase-config.js', './src/net/room.js',
+  // 場面画像（art.js の artImages() と同じ並び。合計 1.6MB ほど）
+  './img/title.webp', './img/closeup-raizo.webp', './img/closeup-hana.webp', './img/closeup-kuranosuke.webp',
+  './img/living-raizo.webp', './img/living-hana.webp', './img/living-kuranosuke.webp',
+  './img/entrance-raizo.webp', './img/entrance-hana.webp', './img/entrance-kuranosuke.webp',
+  './img/slope-raizo.webp', './img/slope-hana.webp', './img/slope-kuranosuke.webp',
+  './img/nikuten-raizo.webp', './img/nikuten-hana.webp', './img/nikuten-kuranosuke.webp',
+  './img/shimabaraya-raizo.webp', './img/shimabaraya-hana.webp', './img/shimabaraya-kuranosuke.webp',
+  './img/station-raizo.webp', './img/station-hana.webp', './img/station-kuranosuke.webp',
+  './img/kichi-raizo.webp', './img/kichi-hana.webp', './img/kichi-kuranosuke.webp',
+  './img/finale.webp',
 ];
 
 self.addEventListener('install', (e) => {

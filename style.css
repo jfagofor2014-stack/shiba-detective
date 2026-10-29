@@ -37,7 +37,10 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
 /* ---------- タイトル ---------- */
 #lobby { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; }
 #title-art { position: relative; min-height: 0; background: #000; }
-#title-art svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#title-art svg, #title-art img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#title-art img { object-fit: cover; }
+/* ロゴとメニューを重ねるので、画像の絵は少し暗くする（SVG の絵は自前で暗くしてある） */
+#title-art:has(img)::after { content: ""; position: absolute; inset: 0; background: rgba(6, 10, 20, .35); pointer-events: none; }
 .title-logo { position: absolute; top: 5%; left: 4%; right: 4%; pointer-events: none; }
 .title-logo h1 { margin: 0; display: flex; align-items: center; gap: .25em; font-weight: normal; }
 .logo {
@@ -132,7 +135,8 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
 }
 #stage { display: contents; }
 #art { background: #000; min-height: 0; }
-#art svg { display: block; width: 100%; height: auto; max-height: 56dvh; margin: 0 auto; }
+#art svg, #art img { display: block; width: 100%; height: auto; max-height: 56dvh; margin: 0 auto; }
+#art img { aspect-ratio: 1024 / 572; object-fit: contain; }
 #dialogue {
   min-height: 0; overflow-y: auto; overscroll-behavior: contain;
   padding: .6em 1.1em; border-top: 2px solid var(--gold-dk);
@@ -170,7 +174,8 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
   .title-logo h1 { justify-content: center; }
   .subtitle { margin: .2em 0 0; text-align: center; }
   #title-art { order: 2; }
-  #title-art svg { position: static; height: auto; }
+  #title-art svg, #title-art img { position: static; height: auto; }
+  #title-art::after { content: none !important; }
   #title-menu { position: static; order: 3; transform: none; justify-self: center; margin: 0 auto; }
   .press-start { position: static; order: 4; }
   .copyright { order: 5; }
